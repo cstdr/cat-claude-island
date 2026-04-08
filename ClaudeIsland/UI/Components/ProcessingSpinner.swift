@@ -29,7 +29,7 @@ struct ProcessingSpinner: View {
                 width: radius * 2,
                 height: radius * 2
             )
-            context.fill(Path(ellipse: ballRect), with: .color(Color(hex: "ffb6c1")))
+            context.fill(Path(roundedRect: ballRect, cornerRadius: radius), with: .color(Color(hex: "ffb6c1")))
 
             // Draw yarn wrap lines (darker pink) - 4 crossing lines
             let lineColor = Color(hex: "e89aa0")
