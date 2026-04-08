@@ -479,6 +479,15 @@ struct ChatView: View {
     }
 
     private func sendToSession(_ text: String) async {
+        guard let pid = session.pid else { return }
+
+        // Try Ghostty first (native AppleScript control)
+        if session.isInGhostty && !session.isInTmux {
+            _ = await GhosttyController.shared.sendText(text, to: pid)
+            return
+        }
+
+        // Fall back to tmux
         guard session.isInTmux else { return }
         guard let tty = session.tty else { return }
 

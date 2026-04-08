@@ -71,6 +71,23 @@ struct ProcessTreeBuilder: Sendable {
         return false
     }
 
+    /// Check if a process has Ghostty in its parent chain
+    nonisolated func isInGhostty(pid: Int, tree: [Int: ProcessInfo]) -> Bool {
+        var current = pid
+        var depth = 0
+
+        while current > 1 && depth < 20 {
+            guard let info = tree[current] else { break }
+            if info.command.lowercased().contains("ghostty") {
+                return true
+            }
+            current = info.ppid
+            depth += 1
+        }
+
+        return false
+    }
+
     /// Walk up the process tree to find the terminal app PID
     nonisolated func findTerminalPid(forProcess pid: Int, tree: [Int: ProcessInfo]) -> Int? {
         var current = pid

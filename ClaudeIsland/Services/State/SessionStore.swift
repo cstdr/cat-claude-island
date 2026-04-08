@@ -129,6 +129,7 @@ actor SessionStore {
         if let pid = event.pid {
             let tree = ProcessTreeBuilder.shared.buildTree()
             session.isInTmux = ProcessTreeBuilder.shared.isInTmux(pid: pid, tree: tree)
+            session.isInGhostty = ProcessTreeBuilder.shared.isInGhostty(pid: pid, tree: tree)
         }
         if let tty = event.tty {
             session.tty = tty.replacingOccurrences(of: "/dev/", with: "")
@@ -177,6 +178,7 @@ actor SessionStore {
             pid: event.pid,
             tty: event.tty?.replacingOccurrences(of: "/dev/", with: ""),
             isInTmux: false,  // Will be updated
+            isInGhostty: false,  // Will be updated
             phase: .idle
         )
     }

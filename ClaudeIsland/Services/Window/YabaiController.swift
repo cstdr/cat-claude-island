@@ -15,14 +15,26 @@ actor YabaiController {
 
     // MARK: - Public API
 
-    /// Focus the terminal window for a given Claude PID (tmux only)
+    /// Focus the terminal window for a given Claude PID
+    /// Uses GhosttyController for native Ghostty focus, falls back to tmux/yabai
     func focusWindow(forClaudePid claudePid: Int) async -> Bool {
+        let tree = ProcessTreeBuilder.shared.buildTree()
+
+        // Check if running in Ghostty but not in tmux - use native Ghostty focus
+        let isInGhostty = ProcessTreeBuilder.shared.isInGhostty(pid: claudePid, tree: tree)
+        let isInTmux = ProcessTreeBuilder.shared.isInTmux(pid: claudePid, tree: tree)
+
+        if isInGhostty && !isInTmux {
+            // Use native Ghostty AppleScript control
+            return await GhosttyController.shared.focusWindow(forClaudePid: claudePid)
+        }
+
+        // Use tmux/yabai for tmux sessions or other terminals
         guard await WindowFinder.shared.isYabaiAvailable() else {
             return false
         }
 
         let windows = await WindowFinder.shared.getAllWindows()
-        let tree = ProcessTreeBuilder.shared.buildTree()
 
         return await focusTmuxInstance(claudePid: claudePid, tree: tree, windows: windows)
     }
@@ -95,7 +107,7 @@ actor YabaiController {
 
     /// Check if command is a terminal (nonisolated helper to avoid MainActor access)
     private nonisolated func isTerminalProcess(_ command: String) -> Bool {
-        let terminalCommands = ["Terminal", "iTerm", "iTerm2", "Alacritty", "kitty", "WezTerm", "wezterm-gui", "Hyper"]
+        let terminalCommands = ["Terminal", "iTerm", "iTerm2", "Ghostty", "Alacritty", "kitty", "WezTerm", "wezterm-gui", "Hyper"]
         return terminalCommands.contains { command.contains($0) }
     }
 
