@@ -21,6 +21,7 @@ struct NotchView: View {
     @StateObject private var sessionMonitor = ClaudeSessionMonitor()
     @StateObject private var activityCoordinator = NotchActivityCoordinator.shared
     @ObservedObject private var updateManager = UpdateManager.shared
+    @AppStorage("keepNotchVisible") private var keepNotchVisible = false
     @State private var previousPendingIds: Set<String> = []
     @State private var previousWaitingForInputIds: Set<String> = []
     @State private var waitingForInputTimestamps: [String: Date] = [:]  // sessionId -> when it entered waitingForInput
@@ -220,6 +221,12 @@ struct NotchView: View {
             handleProcessingChange()
             handleWaitingForInputChange(instances)
         }
+        .onChange(of: keepNotchVisible) { oldValue, newValue in
+            // When Keep Visible is enabled and sessions exist, show the notch
+            if newValue && !sessionMonitor.instances.isEmpty && viewModel.status == .closed {
+                isVisible = true
+            }
+        }
     }
 
     // MARK: - Notch Layout
@@ -402,12 +409,12 @@ struct NotchView: View {
             // Don't hide on non-notched devices - users need a visible target
             if viewModel.status == .closed && viewModel.hasPhysicalNotch {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    if !isAnyProcessing && !hasPendingPermission && !hasWaitingForInput && viewModel.status == .closed {
+                    if !self.isAnyProcessing && !self.hasPendingPermission && !self.hasWaitingForInput && self.viewModel.status == .closed {
                         // Keep visible if setting enabled and sessions exist
-                        if AppSettings.keepNotchVisible && !self.sessionMonitor.instances.isEmpty {
+                        if self.keepNotchVisible && !self.sessionMonitor.instances.isEmpty {
                             return
                         }
-                        isVisible = false
+                        self.isVisible = false
                     }
                 }
             }
@@ -426,9 +433,9 @@ struct NotchView: View {
             // Don't hide on non-notched devices - users need a visible target
             guard viewModel.hasPhysicalNotch else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                if viewModel.status == .closed && !self.isAnyProcessing && !self.hasPendingPermission && !self.hasWaitingForInput && !self.activityCoordinator.expandingActivity.show {
+                if self.viewModel.status == .closed && !self.isAnyProcessing && !self.hasPendingPermission && !self.hasWaitingForInput && !self.activityCoordinator.expandingActivity.show {
                     // Keep visible if setting enabled and sessions exist
-                    if AppSettings.keepNotchVisible && !self.sessionMonitor.instances.isEmpty {
+                    if self.keepNotchVisible && !self.sessionMonitor.instances.isEmpty {
                         return
                     }
                     self.isVisible = false
@@ -495,8 +502,9 @@ struct NotchView: View {
                 }
             }
 
-            // Schedule hiding the checkmark after 30 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [self] in
+            // Schedule hiding the checkmark after the configured display duration
+            let hideDelay = TimeInterval(AppSettings.waitingDisplayDuration)
+            DispatchQueue.main.asyncAfter(deadline: .now() + hideDelay) { [self] in
                 // Trigger a UI update to re-evaluate hasWaitingForInput
                 handleProcessingChange()
             }
