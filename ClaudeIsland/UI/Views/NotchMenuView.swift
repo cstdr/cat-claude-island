@@ -20,6 +20,8 @@ struct NotchMenuView: View {
     @ObservedObject private var soundSelector = SoundSelector.shared
     @State private var hooksInstalled: Bool = false
     @State private var launchAtLogin: Bool = false
+    @State private var keepNotchVisible: Bool = false
+    @State private var waitingDuration: Int = 30
 
     var body: some View {
         VStack(spacing: 4) {
@@ -77,10 +79,27 @@ struct NotchMenuView: View {
             }
 
             // Keep notch visible when sessions exist
-            KeepVisibleRow()
+            MenuToggleRow(
+                icon: "eye",
+                label: String(localized: "Keep Visible"),
+                isOn: keepNotchVisible
+            ) {
+                keepNotchVisible.toggle()
+                UserDefaults.standard.set(keepNotchVisible, forKey: "keepNotchVisible")
+            }
 
             // Waiting duration cycle button
-            DurationRow()
+            MenuToggleRow(
+                icon: "clock",
+                label: String(localized: "Waiting Duration"),
+                isOn: false
+            ) {
+                let durations = [30, 60, 120, 300]
+                let idx = durations.firstIndex(of: waitingDuration) ?? 0
+                let next = durations[(idx + 1) % durations.count]
+                waitingDuration = next
+                UserDefaults.standard.set(next, forKey: "waitingDisplayDuration")
+            }
 
             // Language selector
             LanguageRow()
@@ -131,6 +150,9 @@ struct NotchMenuView: View {
     private func refreshStates() {
         hooksInstalled = HookInstaller.isInstalled()
         launchAtLogin = SMAppService.mainApp.status == .enabled
+        keepNotchVisible = UserDefaults.standard.bool(forKey: "keepNotchVisible")
+        let savedDuration = UserDefaults.standard.integer(forKey: "waitingDisplayDuration")
+        waitingDuration = savedDuration > 0 ? savedDuration : 30
         screenSelector.refreshScreens()
     }
 }
@@ -526,119 +548,6 @@ struct MenuToggleRow: View {
             )
         }
         .buttonStyle(.plain)
-        .onHover { isHovered = $0 }
-    }
-
-    private var textColor: Color {
-        .white.opacity(isHovered ? 1.0 : 0.7)
-    }
-}
-
-// MARK: - Duration Row
-
-struct DurationRow: View {
-    @State private var duration: Int = 30
-    @State private var isHovered = false
-
-    private let durations = [30, 60, 120, 300]
-
-    var body: some View {
-        Button {
-            // Cycle to next duration and save directly
-            let idx = durations.firstIndex(of: duration) ?? 0
-            let next = durations[(idx + 1) % durations.count]
-            UserDefaults.standard.set(next, forKey: "waitingDisplayDuration")
-            duration = next
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "clock")
-                    .font(.system(size: 12))
-                    .foregroundColor(textColor)
-                    .frame(width: 16)
-
-                Text(String(localized: "Waiting Duration"))
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(textColor)
-
-                Spacer()
-
-                Text(durationText)
-                    .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.5))
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isHovered ? Color.white.opacity(0.08) : Color.clear)
-            )
-        }
-        .buttonStyle(.plain)
-        .onAppear {
-            duration = UserDefaults.standard.integer(forKey: "waitingDisplayDuration")
-            if duration == 0 { duration = 30 }
-        }
-        .onHover { isHovered = $0 }
-    }
-
-    private var durationText: String {
-        switch duration {
-        case 30: return "30s"
-        case 60: return "1m"
-        case 120: return "2m"
-        case 300: return "5m"
-        default: return "\(duration)s"
-        }
-    }
-
-    private var textColor: Color {
-        .white.opacity(isHovered ? 1.0 : 0.7)
-    }
-}
-
-// MARK: - Keep Visible Row
-
-struct KeepVisibleRow: View {
-    @State private var keepNotchVisible = false
-    @State private var isHovered = false
-
-    var body: some View {
-        Button {
-            let newValue = !keepNotchVisible
-            UserDefaults.standard.set(newValue, forKey: "keepNotchVisible")
-            keepNotchVisible = newValue
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "eye")
-                    .font(.system(size: 12))
-                    .foregroundColor(textColor)
-                    .frame(width: 16)
-
-                Text(String(localized: "Keep Visible"))
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(textColor)
-
-                Spacer()
-
-                Circle()
-                    .fill(keepNotchVisible ? TerminalColors.green : Color.white.opacity(0.3))
-                    .frame(width: 6, height: 6)
-
-                Text(keepNotchVisible ? "On" : "Off")
-                    .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.4))
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isHovered ? Color.white.opacity(0.08) : Color.clear)
-            )
-        }
-        .buttonStyle(.plain)
-        .onAppear {
-            keepNotchVisible = UserDefaults.standard.bool(forKey: "keepNotchVisible")
-        }
         .onHover { isHovered = $0 }
     }
 
