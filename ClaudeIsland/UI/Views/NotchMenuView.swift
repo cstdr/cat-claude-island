@@ -537,30 +537,27 @@ struct MenuToggleRow: View {
 // MARK: - Duration Row
 
 struct DurationRow: View {
+    @AppStorage("waitingDisplayDuration") private var duration: Int = 30
     @State private var isHovered = false
 
     private let durations = [30, 60, 120, 300]
 
-    private var currentDuration: Int {
-        AppSettings.waitingDisplayDuration
-    }
-
     private var durationLabel: String {
-        switch currentDuration {
+        switch duration {
         case 30: return "30s"
         case 60: return "1m"
         case 120: return "2m"
         case 300: return "5m"
-        default: return "\(currentDuration)s"
+        default: return "\(duration)s"
         }
     }
 
     var body: some View {
         Button {
             // Cycle to next duration
-            let idx = durations.firstIndex(of: currentDuration) ?? 0
+            let idx = durations.firstIndex(of: duration) ?? 0
             let next = durations[(idx + 1) % durations.count]
-            AppSettings.waitingDisplayDuration = next
+            duration = next
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: "clock")
