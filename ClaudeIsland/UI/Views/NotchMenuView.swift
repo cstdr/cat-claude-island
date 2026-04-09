@@ -537,26 +537,17 @@ struct MenuToggleRow: View {
 // MARK: - Duration Row
 
 struct DurationRow: View {
-    @AppStorage("waitingDisplayDuration") private var duration: Int = 30
+    @State private var duration: Int = 30
     @State private var isHovered = false
 
     private let durations = [30, 60, 120, 300]
 
-    private var durationLabel: String {
-        switch duration {
-        case 30: return "30s"
-        case 60: return "1m"
-        case 120: return "2m"
-        case 300: return "5m"
-        default: return "\(duration)s"
-        }
-    }
-
     var body: some View {
         Button {
-            // Cycle to next duration
+            // Cycle to next duration and save directly
             let idx = durations.firstIndex(of: duration) ?? 0
             let next = durations[(idx + 1) % durations.count]
+            UserDefaults.standard.set(next, forKey: "waitingDisplayDuration")
             duration = next
         } label: {
             HStack(spacing: 10) {
@@ -571,7 +562,7 @@ struct DurationRow: View {
 
                 Spacer()
 
-                Text(durationLabel)
+                Text(durationText)
                     .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.5))
             }
@@ -583,7 +574,21 @@ struct DurationRow: View {
             )
         }
         .buttonStyle(.plain)
+        .onAppear {
+            duration = UserDefaults.standard.integer(forKey: "waitingDisplayDuration")
+            if duration == 0 { duration = 30 }
+        }
         .onHover { isHovered = $0 }
+    }
+
+    private var durationText: String {
+        switch duration {
+        case 30: return "30s"
+        case 60: return "1m"
+        case 120: return "2m"
+        case 300: return "5m"
+        default: return "\(duration)s"
+        }
     }
 
     private var textColor: Color {
