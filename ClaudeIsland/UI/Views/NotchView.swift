@@ -408,6 +408,13 @@ struct NotchView: View {
     // MARK: - Event Handlers
 
     private func handleProcessingChange() {
+        // Check Keep Visible first - if enabled and sessions exist, keep showing
+        let keepVisible = UserDefaults.standard.bool(forKey: "keepNotchVisible")
+        if keepVisible && !sessionMonitor.instances.isEmpty {
+            isVisible = true
+            return
+        }
+
         if isAnyProcessing || hasPendingPermission {
             // Show claude activity when processing or waiting for permission
             activityCoordinator.showActivity(type: .claude)
@@ -425,11 +432,6 @@ struct NotchView: View {
             if viewModel.status == .closed && viewModel.hasPhysicalNotch {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     if !self.isAnyProcessing && !self.hasPendingPermission && !self.hasWaitingForInput && self.viewModel.status == .closed {
-                        // Keep visible if setting enabled and sessions exist
-                        let keepVisible = UserDefaults.standard.bool(forKey: "keepNotchVisible")
-                        if keepVisible && !self.sessionMonitor.instances.isEmpty {
-                            return
-                        }
                         self.isVisible = false
                     }
                 }
