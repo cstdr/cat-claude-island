@@ -16,6 +16,7 @@ private let PIXEL_SIZE: CGFloat = 3
 private enum PixelColor {
     static let black = Color(hex: "2a2a2a")
     static let gray = Color(hex: "5a5a5a")
+    static let lightGray = Color(hex: "8a8a8a")
     static let white = Color(hex: "f5f5f5")
     static let pink = Color(hex: "ffb6c1")
 }
@@ -132,7 +133,7 @@ struct WaitingCatIcon: View {
     }
 }
 
-// MARK: - Running Icon (galloping)
+// MARK: - Running Icon (v6: white triangle face, pink square nose)
 struct RunningCatIcon: View {
     let size: CGFloat
     @State private var frame: Int = 0
@@ -143,70 +144,126 @@ struct RunningCatIcon: View {
     }
 
     var body: some View {
-        Canvas { context, _ in
-            let scale = size / 48
+        Canvas { context, canvasSize in
+            let scale = size / 32
             context.scaleBy(x: scale, y: scale)
 
-            func p(_ x: Int, _ y: Int, _ c: Color) {
-                let rect = CGRect(
-                    x: CGFloat(x) * PIXEL_SIZE,
-                    y: CGFloat(y) * PIXEL_SIZE,
-                    width: PIXEL_SIZE,
-                    height: PIXEL_SIZE
-                )
+            func px(_ x: Int, _ y: Int, _ c: Color) {
+                let rect = CGRect(x: CGFloat(x - 4), y: CGFloat(y - 3), width: 1, height: 1)
                 context.fill(Path(rect), with: .color(c))
             }
 
+            let G = PixelColor.gray
+            let B = PixelColor.black
+            let W = PixelColor.white
+            let P = PixelColor.pink
+            let D = PixelColor.lightGray
+
             switch frame {
             case 0:
-                // frame 0 - front up
-                for x in 2..<8 { p(x, 4, PixelColor.gray) }
-                for x in 1..<9 { p(x, 5, PixelColor.gray); p(x, 6, PixelColor.gray) }
-                for x in 0..<6 { p(x, 7, PixelColor.white) }
-                p(7, 2, PixelColor.gray); p(8, 2, PixelColor.black)
-                p(8, 3, PixelColor.black)
-                p(8, 4, PixelColor.pink)
-                p(9, 5, PixelColor.white); p(9, 6, PixelColor.white)
-                p(0, 6, PixelColor.white); p(1, 6, PixelColor.white)
-                p(0, 3, PixelColor.black); p(0, 4, PixelColor.black)
+                for x in 18..<24 { px(x, 6, G); px(x, 11, G) }
+                for x in 17..<25 { px(x, 7, G); px(x, 8, G); px(x, 9, G); px(x, 10, G) }
+                px(20, 8, W); px(21, 8, W)
+                px(19, 9, W); px(20, 9, W); px(21, 9, W); px(22, 9, W)
+                for x in 18..<24 { px(x, 10, W); px(x, 11, W); }
+                px(20, 9, P); px(21, 9, P)
+                px(20, 10, P); px(21, 10, P)
+                px(18, 7, B); px(23, 7, B)
+                px(17, 5, B); px(18, 5, B)
+                px(16, 4, B); px(17, 4, B); px(18, 4, B)
+                px(24, 5, B); px(25, 5, B)
+                px(24, 4, B); px(25, 4, B); px(26, 4, B)
+                for x in 10..<18 { px(x, 11, G); px(x, 12, G); px(x, 13, G) }
+                px(14, 12, W); px(15, 12, W); px(16, 12, W)
+                px(14, 13, W); px(15, 13, W); px(16, 13, W)
+                px(11, 11, D); px(15, 11, D)
+                px(8, 10, B); px(7, 9, B); px(6, 8, B); px(5, 7, B); px(4, 6, B)
+                px(18, 14, W); px(19, 14, W)
+                px(19, 15, W); px(20, 15, W)
+                px(18, 16, W); px(19, 16, W)
+                px(10, 16, W); px(11, 16, W)
+                px(9, 17, W); px(10, 17, W)
+                px(8, 18, W); px(9, 18, W)
+
             case 1:
-                // frame 1 - mid
-                for x in 2..<8 { p(x, 5, PixelColor.gray) }
-                for x in 1..<9 { p(x, 6, PixelColor.gray); p(x, 7, PixelColor.gray) }
-                for x in 1..<7 { p(x, 8, PixelColor.white) }
-                p(7, 3, PixelColor.gray); p(8, 3, PixelColor.black)
-                p(7, 4, PixelColor.black)
-                p(8, 5, PixelColor.pink)
-                p(9, 6, PixelColor.white); p(9, 7, PixelColor.white)
-                p(1, 7, PixelColor.white); p(1, 8, PixelColor.white)
-                p(0, 5, PixelColor.black); p(0, 6, PixelColor.black)
+                for x in 18..<24 { px(x, 6, G); px(x, 11, G) }
+                for x in 17..<25 { px(x, 7, G); px(x, 8, G); px(x, 9, G); px(x, 10, G) }
+                px(20, 8, W); px(21, 8, W)
+                px(19, 9, W); px(20, 9, W); px(21, 9, W); px(22, 9, W)
+                for x in 18..<24 { px(x, 10, W); px(x, 11, W); }
+                px(20, 9, P); px(21, 9, P)
+                px(20, 10, P); px(21, 10, P)
+                px(18, 7, B); px(23, 7, B)
+                px(17, 5, B); px(18, 5, B)
+                px(16, 4, B); px(17, 4, B); px(18, 4, B)
+                px(24, 5, B); px(25, 5, B)
+                px(24, 4, B); px(25, 4, B); px(26, 4, B)
+                for x in 10..<18 { px(x, 11, G); px(x, 12, G); px(x, 13, G) }
+                px(14, 12, W); px(15, 12, W); px(16, 12, W)
+                px(14, 13, W); px(15, 13, W); px(16, 13, W)
+                px(11, 11, D); px(15, 11, D)
+                px(8, 10, B); px(7, 9, B); px(6, 8, B); px(5, 7, B); px(4, 6, B)
+                px(18, 15, W); px(19, 15, W)
+                px(19, 16, W); px(20, 16, W)
+                px(18, 17, W); px(19, 17, W)
+                px(10, 15, W); px(11, 15, W)
+                px(9, 16, W); px(10, 16, W)
+                px(8, 17, W); px(9, 17, W)
+
             case 2:
-                // frame 2 - front down
-                for x in 2..<8 { p(x, 6, PixelColor.gray) }
-                for x in 1..<9 { p(x, 7, PixelColor.gray); p(x, 8, PixelColor.gray) }
-                for x in 0..<6 { p(x, 9, PixelColor.white) }
-                p(7, 4, PixelColor.gray); p(8, 4, PixelColor.black)
-                p(7, 5, PixelColor.black)
-                p(8, 6, PixelColor.pink)
-                p(9, 7, PixelColor.white); p(9, 8, PixelColor.white)
-                p(1, 8, PixelColor.white); p(1, 9, PixelColor.white)
-                p(0, 6, PixelColor.black); p(0, 7, PixelColor.black)
+                for x in 18..<24 { px(x, 6, G); px(x, 11, G) }
+                for x in 17..<25 { px(x, 7, G); px(x, 8, G); px(x, 9, G); px(x, 10, G) }
+                px(20, 8, W); px(21, 8, W)
+                px(19, 9, W); px(20, 9, W); px(21, 9, W); px(22, 9, W)
+                for x in 18..<24 { px(x, 10, W); px(x, 11, W); }
+                px(20, 9, P); px(21, 9, P)
+                px(20, 10, P); px(21, 10, P)
+                px(18, 7, B); px(23, 7, B)
+                px(17, 5, B); px(18, 5, B)
+                px(16, 4, B); px(17, 4, B); px(18, 4, B)
+                px(24, 5, B); px(25, 5, B)
+                px(24, 4, B); px(25, 4, B); px(26, 4, B)
+                for x in 10..<18 { px(x, 11, G); px(x, 12, G); px(x, 13, G) }
+                px(14, 12, W); px(15, 12, W); px(16, 12, W)
+                px(14, 13, W); px(15, 13, W); px(16, 13, W)
+                px(11, 11, D); px(15, 11, D)
+                px(8, 10, B); px(7, 9, B); px(6, 8, B); px(5, 7, B); px(4, 6, B)
+                px(16, 16, W); px(17, 16, W)
+                px(15, 17, W); px(16, 17, W)
+                px(14, 18, W); px(15, 18, W)
+                px(12, 14, W); px(13, 14, W)
+                px(13, 15, W); px(14, 15, W)
+                px(12, 16, W); px(13, 16, W)
+
             default:
-                // frame 3 - mid back
-                for x in 2..<8 { p(x, 5, PixelColor.gray) }
-                for x in 1..<9 { p(x, 6, PixelColor.gray); p(x, 7, PixelColor.gray) }
-                for x in 1..<7 { p(x, 8, PixelColor.white) }
-                p(7, 3, PixelColor.gray); p(8, 3, PixelColor.black)
-                p(7, 4, PixelColor.black)
-                p(8, 5, PixelColor.pink)
-                p(9, 6, PixelColor.white); p(9, 7, PixelColor.white)
-                p(1, 7, PixelColor.white); p(1, 8, PixelColor.white)
-                p(0, 5, PixelColor.black); p(0, 6, PixelColor.black)
+                for x in 18..<24 { px(x, 6, G); px(x, 11, G) }
+                for x in 17..<25 { px(x, 7, G); px(x, 8, G); px(x, 9, G); px(x, 10, G) }
+                px(20, 8, W); px(21, 8, W)
+                px(19, 9, W); px(20, 9, W); px(21, 9, W); px(22, 9, W)
+                for x in 18..<24 { px(x, 10, W); px(x, 11, W); }
+                px(20, 9, P); px(21, 9, P)
+                px(20, 10, P); px(21, 10, P)
+                px(18, 7, B); px(23, 7, B)
+                px(17, 5, B); px(18, 5, B)
+                px(16, 4, B); px(17, 4, B); px(18, 4, B)
+                px(24, 5, B); px(25, 5, B)
+                px(24, 4, B); px(25, 4, B); px(26, 4, B)
+                for x in 10..<18 { px(x, 11, G); px(x, 12, G); px(x, 13, G) }
+                px(14, 12, W); px(15, 12, W); px(16, 12, W)
+                px(14, 13, W); px(15, 13, W); px(16, 13, W)
+                px(11, 11, D); px(15, 11, D)
+                px(8, 10, B); px(7, 9, B); px(6, 8, B); px(5, 7, B); px(4, 6, B)
+                px(17, 15, W); px(18, 15, W)
+                px(18, 16, W); px(19, 16, W)
+                px(17, 17, W); px(18, 17, W)
+                px(11, 15, W); px(12, 15, W)
+                px(10, 16, W); px(11, 16, W)
+                px(9, 17, W); px(10, 17, W)
             }
         }
         .frame(width: size, height: size)
         .onAppear {
-            timerCancellable = Timer.publish(every: 0.15, on: .main, in: .common)
+            timerCancellable = Timer.publish(every: 0.12, on: .main, in: .common)
                 .autoconnect()
                 .sink { _ in
                     frame = (frame + 1) % 4

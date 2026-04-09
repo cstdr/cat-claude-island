@@ -261,11 +261,11 @@ struct NotchView: View {
     @ViewBuilder
     private var headerRow: some View {
         HStack(spacing: 0) {
-            // Left side - crab + optional permission indicator (visible when processing, pending, or waiting for input)
+            // Left side - show all session cats + optional permission indicator (visible when processing, pending, or waiting for input)
             if showClosedActivity {
-                HStack(spacing: 4) {
-                    MenuBarCatIcon(phase: primaryPhase, size: 40)
-                        .matchedGeometryEffect(id: "crab", in: activityNamespace, isSource: showClosedActivity)
+                HStack(spacing: 2) {
+                    // Arrange cats based on count: 1=1row, 2=horizontal, 3=triangle, 4=square
+                    MultiCatLayout(sessions: Array(sessionMonitor.instances), maxSize: 42)
 
                     // Permission indicator only (amber) - waiting for input shows checkmark on right
                     if hasPendingPermission {
@@ -318,12 +318,11 @@ struct NotchView: View {
 
     @ViewBuilder
     private var openedHeaderContent: some View {
-        HStack(spacing: 12) {
-            // Show static cat only if not showing activity in headerRow
-            // (headerRow handles cat + indicator when showClosedActivity is true)
+        HStack(spacing: 0.12) {
+            // Show all session cats (even when not showing activity in headerRow)
+            // In opened state, use larger icons with MultiCatLayout
             if !showClosedActivity {
-                MenuBarCatIcon(phase: primaryPhase, size: 40)
-                    .matchedGeometryEffect(id: "crab", in: activityNamespace, isSource: !showClosedActivity)
+                OpenedMultiCatLayout(sessions: Array(sessionMonitor.instances), baseSize: 28)
                     .padding(.leading, 8)
             }
 
@@ -514,5 +513,197 @@ struct NotchView: View {
         }
 
         return false
+    }
+}
+
+// MARK: - Multi Cat Layout
+struct MultiCatLayout: View {
+    let sessions: [SessionState]
+    let maxSize: CGFloat
+
+    /// Show first 4 sessions, then +N indicator
+    private let maxVisible = 4
+
+    init(sessions: [SessionState], maxSize: CGFloat = 24) {
+        self.sessions = sessions
+        self.maxSize = maxSize
+    }
+
+    /// Calculate icon size based on session count to fit within maxSize
+    private var iconSize: CGFloat {
+        let spacing: CGFloat = 1
+        let visibleCount = min(sessions.count, maxVisible)
+        switch visibleCount {
+        case 0:
+            return 0
+        case 1:
+            return maxSize
+        default:
+            // Multiple cats scale down: 2 * size + spacing <= maxSize
+            return (maxSize - spacing) / 2
+        }
+    }
+
+    /// Number of sessions beyond the visible ones
+    private var overflowCount: Int {
+        max(0, sessions.count - maxVisible)
+    }
+
+    var body: some View {
+        let visibleSessions = Array(sessions.prefix(maxVisible))
+
+        ZStack(alignment: .bottomTrailing) {
+            // Main cat layout
+            mainLayout(sessions: visibleSessions)
+
+            // Overflow indicator
+            if overflowCount > 0 {
+                Text("+\(overflowCount)")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(2)
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(3)
+                    .offset(x: 2, y: 2)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func mainLayout(sessions: [SessionState]) -> some View {
+        switch sessions.count {
+        case 0:
+            EmptyView()
+        case 1:
+            StatusIcon(phase: sessions[0].phase, size: maxSize)
+        case 2:
+            HStack(alignment: .top, spacing: 0.1) {
+                StatusIcon(phase: sessions[0].phase, size: iconSize)
+                StatusIcon(phase: sessions[1].phase, size: iconSize)
+            }
+        case 3:
+            VStack(spacing: 0) {
+                StatusIcon(phase: sessions[0].phase, size: iconSize)
+                    .offset(y: iconSize * 0.3)
+                HStack(spacing: 0.1) {
+                    StatusIcon(phase: sessions[1].phase, size: iconSize)
+                    StatusIcon(phase: sessions[2].phase, size: iconSize)
+                }
+            }
+        default:
+            VStack(spacing: 0) {
+                HStack(spacing: 0.1) {
+                    StatusIcon(phase: sessions[0].phase, size: iconSize)
+                        .offset(y: iconSize * 0.3)
+                    StatusIcon(phase: sessions[1].phase, size: iconSize)
+                        .offset(y: iconSize * 0.3)
+                }
+                HStack(spacing: 0.1) {
+                    StatusIcon(phase: sessions[2].phase, size: iconSize)
+                    StatusIcon(phase: sessions[3].phase, size: iconSize)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Opened Multi Cat Layout (for expanded notch view with larger icons)
+struct OpenedMultiCatLayout: View {
+    let sessions: [SessionState]
+    let baseSize: CGFloat
+
+    /// Show first 4 sessions, then +N indicator
+    private let maxVisible = 4
+
+    init(sessions: [SessionState], baseSize: CGFloat = 28) {
+        self.sessions = sessions
+        self.baseSize = baseSize
+    }
+
+    /// Calculate icon size based on session count to fit within baseSize
+    private var iconSize: CGFloat {
+        let spacing: CGFloat = 1
+        let visibleCount = min(sessions.count, maxVisible)
+        switch visibleCount {
+        case 0:
+            return 0
+        case 1:
+            return baseSize
+        default:
+            // Multiple cats scale down to fit
+            return (baseSize - spacing) / 2
+        }
+    }
+
+    /// Number of sessions beyond the visible ones
+    private var overflowCount: Int {
+        max(0, sessions.count - maxVisible)
+    }
+
+    var body: some View {
+        let visibleSessions = Array(sessions.prefix(maxVisible))
+
+        ZStack(alignment: .bottomTrailing) {
+            // Main cat layout
+            mainLayout(sessions: visibleSessions)
+
+            // Overflow indicator
+            if overflowCount > 0 {
+                Text("+\(overflowCount)")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(3)
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(4)
+                    .offset(x: 4, y: 4)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func mainLayout(sessions: [SessionState]) -> some View {
+        switch sessions.count {
+        case 0:
+            EmptyView()
+        case 1:
+            MenuBarCatIcon(phase: sessions[0].phase, size: baseSize)
+        case 2:
+            HStack(alignment: .top, spacing: 0.1) {
+                MenuBarCatIcon(phase: sessions[0].phase, size: iconSizeForPhase(sessions[0].phase))
+                MenuBarCatIcon(phase: sessions[1].phase, size: iconSizeForPhase(sessions[1].phase))
+            }
+        case 3:
+            VStack(spacing: 0) {
+                MenuBarCatIcon(phase: sessions[0].phase, size: iconSizeForPhase(sessions[0].phase))
+                    .offset(y: iconSize * 0.3)
+                HStack(spacing: 0.1) {
+                    MenuBarCatIcon(phase: sessions[1].phase, size: iconSizeForPhase(sessions[1].phase))
+                    MenuBarCatIcon(phase: sessions[2].phase, size: iconSizeForPhase(sessions[2].phase))
+                }
+            }
+        default:
+            VStack(spacing: 0) {
+                HStack(spacing: 0.1) {
+                    MenuBarCatIcon(phase: sessions[0].phase, size: iconSizeForPhase(sessions[0].phase))
+                        .offset(y: iconSize * 0.3)
+                    MenuBarCatIcon(phase: sessions[1].phase, size: iconSizeForPhase(sessions[1].phase))
+                        .offset(y: iconSize * 0.3)
+                }
+                HStack(spacing: 0.1) {
+                    MenuBarCatIcon(phase: sessions[2].phase, size: iconSizeForPhase(sessions[2].phase))
+                    MenuBarCatIcon(phase: sessions[3].phase, size: iconSizeForPhase(sessions[3].phase))
+                }
+            }
+        }
+    }
+
+    /// Returns icon size, with running phases getting a larger size
+    private func iconSizeForPhase(_ phase: SessionPhase) -> CGFloat {
+        switch phase {
+        case .processing, .compacting:
+            return iconSize * 1.3  // Running icons are bigger
+        default:
+            return iconSize
+        }
     }
 }

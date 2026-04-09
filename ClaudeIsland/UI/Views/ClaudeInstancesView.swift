@@ -293,7 +293,7 @@ struct InstanceRow: View {
         case .processing, .compacting:
             LargeRunningCatIcon(size: 20)
         default:
-            StatusIcon(phase: session.phase, size: 14)
+            StatusIcon(phase: session.phase, size: 18)
         }
     }
 
