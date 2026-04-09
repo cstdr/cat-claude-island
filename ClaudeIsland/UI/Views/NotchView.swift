@@ -229,7 +229,7 @@ struct NotchView: View {
                 isVisible = true
             }
         }
-        .onReceive(UserDefaults.didChangeNotification) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
             // Re-read keepNotchVisible when UserDefaults changes
             let newValue = UserDefaults.standard.bool(forKey: "keepNotchVisible")
             if newValue != keepNotchVisible {
