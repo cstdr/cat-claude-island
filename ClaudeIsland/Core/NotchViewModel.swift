@@ -169,8 +169,6 @@ class NotchViewModel: ObservableObject {
 
         let newHovering = inNotch || inOpened
 
-        print("[ViewModel] handleMouseMove: loc=\(location), inNotch=\(inNotch), inOpened=\(inOpened), status=\(status), isHovering=\(isHovering)->\(newHovering)")
-
         // Only update if changed to prevent unnecessary re-renders
         guard newHovering != isHovering else { return }
 

@@ -13,7 +13,7 @@ import Combine
 private let PIXEL_SIZE: CGFloat = 3
 
 // MARK: - Colors (Gulu palette)
-private enum PixelColor {
+public enum PixelColor {
     static let black = Color(hex: "2a2a2a")
     static let gray = Color(hex: "5a5a5a")
     static let lightGray = Color(hex: "8a8a8a")
@@ -31,19 +31,31 @@ struct IdleCatIcon: View {
     }
 
     var body: some View {
-        Canvas { context, _ in
-            let scale = size / 48
+        Canvas { context, canvasSize in
+            // Icon bounding box: x:1-8 (width 8), y:1-8 (height 8)
+            let iconWidth: CGFloat = 8
+            let iconHeight: CGFloat = 8
+            let pixelSize: CGFloat = 3
+
+            let scaleX = canvasSize.width / (iconWidth * pixelSize) * 0.75
+            let scaleY = canvasSize.height / (iconHeight * pixelSize) * 0.75
+            let scale = min(scaleX, scaleY)
+
             context.scaleBy(x: scale, y: scale)
+
+            let offsetX = (canvasSize.width / scale - iconWidth * pixelSize) / 2
 
             func p(_ x: Int, _ y: Int, _ c: Color) {
                 let rect = CGRect(
-                    x: CGFloat(x) * PIXEL_SIZE,
-                    y: CGFloat(y) * PIXEL_SIZE,
-                    width: PIXEL_SIZE,
-                    height: PIXEL_SIZE
+                    x: CGFloat(x) * pixelSize + offsetX,
+                    y: CGFloat(y) * pixelSize + offsetY,
+                    width: pixelSize,
+                    height: pixelSize
                 )
                 context.fill(Path(rect), with: .color(c))
             }
+
+            let offsetY = (canvasSize.height / scale - iconHeight * pixelSize) / 2
 
             let b = Int(breathOffset)
 
@@ -80,16 +92,27 @@ struct WaitingCatIcon: View {
     }
 
     var body: some View {
-        Canvas { context, _ in
-            let scale = size / 48
+        Canvas { context, canvasSize in
+            // Icon bounding box: x:1-9 (width 8), y:1-12 (height 11)
+            let iconWidth: CGFloat = 8
+            let iconHeight: CGFloat = 11
+            let pixelSize: CGFloat = 3
+
+            let scaleX = canvasSize.width / (iconWidth * pixelSize)
+            let scaleY = canvasSize.height / (iconHeight * pixelSize)
+            let scale = min(scaleX, scaleY)
+
             context.scaleBy(x: scale, y: scale)
+
+            let offsetX = (canvasSize.width / scale - iconWidth * pixelSize) / 2
+            let offsetY = (canvasSize.height / scale - iconHeight * pixelSize) / 2
 
             func p(_ x: Int, _ y: Int, _ c: Color) {
                 let rect = CGRect(
-                    x: CGFloat(x) * PIXEL_SIZE,
-                    y: CGFloat(y) * PIXEL_SIZE,
-                    width: PIXEL_SIZE,
-                    height: PIXEL_SIZE
+                    x: CGFloat(x) * pixelSize + offsetX,
+                    y: CGFloat(y) * pixelSize + offsetY,
+                    width: pixelSize,
+                    height: pixelSize
                 )
                 context.fill(Path(rect), with: .color(c))
             }
@@ -145,11 +168,26 @@ struct RunningCatIcon: View {
 
     var body: some View {
         Canvas { context, canvasSize in
-            let scale = size / 32
+            // Icon bounding box in pixel coords: x:4-26 (width 22), y:3-18 (height 15)
+            let iconWidth: CGFloat = 22
+            let iconHeight: CGFloat = 15
+
+            let scaleX = canvasSize.width / iconWidth
+            let scaleY = canvasSize.height / iconHeight
+            let scale = min(scaleX, scaleY)
+
             context.scaleBy(x: scale, y: scale)
 
+            let offsetX = (canvasSize.width / scale - iconWidth) / 2
+            let offsetY = (canvasSize.height / scale - iconHeight) / 2
+
             func px(_ x: Int, _ y: Int, _ c: Color) {
-                let rect = CGRect(x: CGFloat(x - 4), y: CGFloat(y - 3), width: 1, height: 1)
+                let rect = CGRect(
+                    x: CGFloat(x - 4) + offsetX,
+                    y: CGFloat(y - 3) + offsetY,
+                    width: 1,
+                    height: 1
+                )
                 context.fill(Path(rect), with: .color(c))
             }
 
@@ -275,7 +313,7 @@ struct RunningCatIcon: View {
     }
 }
 
-// MARK: - Approval Icon (paw raised)
+// MARK: - Approval Icon (sitting cat with raised paw)
 struct ApprovalCatIcon: View {
     let size: CGFloat
     @State private var pawBob: CGFloat = 0
@@ -285,51 +323,69 @@ struct ApprovalCatIcon: View {
     }
 
     var body: some View {
-        Canvas { context, _ in
-            let scale = size / 48
+        Canvas { context, canvasSize in
+            // Compact grid: 8 wide x 8 tall (same as idle)
+            let iconWidth: CGFloat = 8
+            let iconHeight: CGFloat = 8
+            let pixelSize: CGFloat = 3
+
+            let scaleX = canvasSize.width / (iconWidth * pixelSize) * 0.9
+            let scaleY = canvasSize.height / (iconHeight * pixelSize) * 0.9
+            let scale = min(scaleX, scaleY)
+
             context.scaleBy(x: scale, y: scale)
+
+            let offsetX = (canvasSize.width / scale - iconWidth * pixelSize) / 2
+            let offsetY = (canvasSize.height / scale - iconHeight * pixelSize) / 2
 
             func p(_ x: Int, _ y: Int, _ c: Color) {
                 let rect = CGRect(
-                    x: CGFloat(x) * PIXEL_SIZE,
-                    y: CGFloat(y) * PIXEL_SIZE,
-                    width: PIXEL_SIZE,
-                    height: PIXEL_SIZE
+                    x: CGFloat(x) * pixelSize + offsetX,
+                    y: CGFloat(y) * pixelSize + offsetY,
+                    width: pixelSize,
+                    height: pixelSize
                 )
                 context.fill(Path(rect), with: .color(c))
             }
 
             let bob = Int(pawBob)
 
-            // body
-            for x in 2..<8 { p(x, 6, PixelColor.gray) }
-            for x in 1..<9 { p(x, 7, PixelColor.gray); p(x, 8, PixelColor.gray) }
-            for x in 3..<7 { p(x, 8, PixelColor.white) }
+            // EARS at top
+            p(1, 0, PixelColor.gray); p(2, 0, PixelColor.gray)
+            p(5, 0, PixelColor.gray); p(6, 0, PixelColor.gray)
 
-            // head
-            for x in 2..<8 { p(x, 2, PixelColor.gray) }
-            for x in 1..<9 { p(x, 3, PixelColor.black) }
-            p(2, 1, PixelColor.black); p(7, 1, PixelColor.black)
+            // HEAD row 1
+            for x in 1..<7 { p(x, 1, PixelColor.gray) }
 
-            // eyes
-            p(3, 3, PixelColor.black); p(4, 3, PixelColor.white)
-            p(5, 3, PixelColor.black)
-            p(6, 3, PixelColor.black)
+            // HEAD row 2 (face - black with white eyes)
+            for x in 0..<8 { p(x, 2, PixelColor.black) }
+            p(2, 2, PixelColor.white); p(3, 2, PixelColor.white)   // left eye
+            p(4, 2, PixelColor.white); p(5, 2, PixelColor.white)   // right eye
 
-            // nose
-            p(4, 4, PixelColor.pink); p(5, 4, PixelColor.pink)
+            // NOSE row 3
+            for x in 0..<8 { p(x, 3, PixelColor.black) }
+            p(3, 3, PixelColor.pink); p(4, 3, PixelColor.pink)
 
-            // raised paw
-            p(8, 2 + bob, PixelColor.white); p(9, 2 + bob, PixelColor.white)
-            p(9, 1 + bob, PixelColor.white)
+            // BODY row 4
+            for x in 1..<7 { p(x, 4, PixelColor.gray) }
 
-            // paws
-            p(2, 9, PixelColor.white); p(3, 9, PixelColor.white)
-            p(6, 9, PixelColor.white); p(7, 9, PixelColor.white)
+            // BODY row 5
+            for x in 0..<8 { p(x, 5, PixelColor.gray) }
+
+            // BODY row 6 (white chest)
+            for x in 1..<7 { p(x, 6, PixelColor.gray) }
+            for x in 2..<6 { p(x, 6, PixelColor.white) }
+
+            // RAISED PAW (right side, animated)
+            p(7, 1 + bob, PixelColor.white); p(7, 2 + bob, PixelColor.white)
+
+            // BOTTOM PAWS
+            p(1, 7, PixelColor.white); p(2, 7, PixelColor.white)
+            p(5, 7, PixelColor.white); p(6, 7, PixelColor.white)
         }
         .frame(width: size, height: size)
         .onAppear {
-            withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+            withAnimation(.easeInOut(duration: 0.4).repeatForever(autoreverses: true)) {
                 pawBob = pawBob == 0 ? -1 : 0
             }
         }
@@ -362,7 +418,7 @@ struct StatusIcon: View {
 
 // MARK: - Color Extension
 extension Color {
-    init(hex: String) {
+    public init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)

@@ -45,16 +45,13 @@ actor GhosttyController {
     func sendText(_ text: String, to claudePid: Int) async -> Bool {
         // Get working directory for this PID
         guard let cwd = ProcessTreeBuilder.shared.getWorkingDirectory(forPid: claudePid) else {
-            print("DEBUG Ghostty: Could not get working directory for pid \(claudePid)")
             return false
         }
-        print("DEBUG Ghostty: PID \(claudePid) cwd = \(cwd)")
 
         // Escape special characters in the text for AppleScript
         let escapedText = text
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
-        print("DEBUG Ghostty: Sending text: \(text)")
 
         // Find the terminal with matching working directory, activate, then send text and enter
         let script = """
@@ -82,7 +79,6 @@ actor GhosttyController {
 
         do {
             let output = try await runAppleScript(script)
-            print("DEBUG Ghostty: AppleScript output: \(output)")
             if output.contains("NO_TERMINAL") {
                 Self.logger.debug("No Ghostty terminal found with cwd: \(cwd, privacy: .public)")
                 return false
@@ -90,7 +86,6 @@ actor GhosttyController {
             return output.contains("SENT")
         } catch {
             Self.logger.error("Failed to send text to Ghostty: \(error.localizedDescription, privacy: .public)")
-            print("DEBUG Ghostty: Error: \(error)")
             return false
         }
     }

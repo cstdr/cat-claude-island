@@ -348,7 +348,7 @@ struct NotchView: View {
     }
 
     private var sideWidth: CGFloat {
-        max(0, closedNotchSize.height - 12) + 10
+        max(0, closedNotchSize.height - 12) + 20
     }
 
     // MARK: - Opened Header Content
@@ -361,6 +361,7 @@ struct NotchView: View {
             if !showClosedActivity {
                 OpenedMultiCatLayout(sessions: Array(sessionMonitor.instances), baseSize: 28)
                     .padding(.leading, 8)
+                    .offset(x: -1, y: -2)
             }
 
             Spacer()
@@ -426,9 +427,7 @@ struct NotchView: View {
         // Check Keep Visible first - if enabled and sessions exist, keep showing
         let keepVisible = UserDefaults.standard.bool(forKey: "keepNotchVisible")
         let instancesCount = sessionMonitor.instances.count
-        print("[DEBUG] handleProcessingChange: keepVisible=\(keepVisible), instances=\(instancesCount), status=\(viewModel.status)")
         if keepVisible && instancesCount > 0 {
-            print("[DEBUG] handleProcessingChange: Keep Visible enabled, keeping notch visible")
             // Still need to show activity if processing
             if isAnyProcessing || hasPendingPermission {
                 activityCoordinator.showActivity(type: .claude)
@@ -453,9 +452,7 @@ struct NotchView: View {
             // Don't hide on non-notched devices - users need a visible target
             if viewModel.status == .closed && viewModel.hasPhysicalNotch {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    print("[DEBUG] asyncAfter 0.5s: checking if should hide, status=\(self.viewModel.status), keepVisible=\(UserDefaults.standard.bool(forKey: "keepNotchVisible"))")
                     if !self.isAnyProcessing && !self.hasPendingPermission && !self.hasWaitingForInput && self.viewModel.status == .closed {
-                        print("[DEBUG] asyncAfter: setting isVisible = false")
                         self.isVisible = false
                     }
                 }
@@ -464,7 +461,6 @@ struct NotchView: View {
     }
 
     private func handleStatusChange(from oldStatus: NotchStatus, to newStatus: NotchStatus) {
-        print("[DEBUG] handleStatusChange: \(oldStatus) -> \(newStatus)")
         switch newStatus {
         case .opened, .popping:
             isVisible = true
@@ -482,15 +478,12 @@ struct NotchView: View {
                 }
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                print("[DEBUG] handleStatusChange asyncAfter 0.35s: status=\(self.viewModel.status), keepVisible=\(UserDefaults.standard.bool(forKey: "keepNotchVisible")), instances=\(self.sessionMonitor.instances.count)")
                 if self.viewModel.status == .closed && !self.isAnyProcessing && !self.hasPendingPermission && !self.hasWaitingForInput && !self.activityCoordinator.expandingActivity.show {
                     // Keep visible if setting enabled and sessions exist
                     let keepVisible = UserDefaults.standard.bool(forKey: "keepNotchVisible")
                     if keepVisible && !self.sessionMonitor.instances.isEmpty {
-                        print("[DEBUG] handleStatusChange asyncAfter: Keep Visible, keeping visible")
                         return
                     }
-                    print("[DEBUG] handleStatusChange asyncAfter: setting isVisible = false")
                     self.isVisible = false
                 }
             }
@@ -640,36 +633,45 @@ struct MultiCatLayout: View {
 
     @ViewBuilder
     private func mainLayout(sessions: [SessionState]) -> some View {
+        let scaledSize = maxSize * 0.9
+        let singleIconSize = scaledSize * 0.64  // 36% smaller for single icon (20% x 20%)
         switch sessions.count {
         case 0:
             EmptyView()
         case 1:
-            StatusIcon(phase: sessions[0].phase, size: maxSize)
+            StatusIcon(phase: sessions[0].phase, size: singleIconSize)
+                .offset(y: -2)
         case 2:
             HStack(alignment: .top, spacing: 0.1) {
-                StatusIcon(phase: sessions[0].phase, size: iconSize)
-                StatusIcon(phase: sessions[1].phase, size: iconSize)
+                StatusIcon(phase: sessions[0].phase, size: iconSize * 0.9)
+                    .offset(y: -2)
+                StatusIcon(phase: sessions[1].phase, size: iconSize * 0.9)
+                    .offset(y: -2)
             }
         case 3:
             VStack(spacing: 0) {
-                StatusIcon(phase: sessions[0].phase, size: iconSize)
-                    .offset(y: iconSize * 0.3)
+                StatusIcon(phase: sessions[0].phase, size: iconSize * 0.9)
+                    .offset(y: iconSize * 0.3 - 2)
                 HStack(spacing: 0.1) {
-                    StatusIcon(phase: sessions[1].phase, size: iconSize)
-                    StatusIcon(phase: sessions[2].phase, size: iconSize)
+                    StatusIcon(phase: sessions[1].phase, size: iconSize * 0.9)
+                        .offset(y: -2)
+                    StatusIcon(phase: sessions[2].phase, size: iconSize * 0.9)
+                        .offset(y: -2)
                 }
             }
         default:
             VStack(spacing: 0) {
                 HStack(spacing: 0.1) {
-                    StatusIcon(phase: sessions[0].phase, size: iconSize)
-                        .offset(y: iconSize * 0.3)
-                    StatusIcon(phase: sessions[1].phase, size: iconSize)
-                        .offset(y: iconSize * 0.3)
+                    StatusIcon(phase: sessions[0].phase, size: iconSize * 0.9)
+                        .offset(y: iconSize * 0.3 - 2)
+                    StatusIcon(phase: sessions[1].phase, size: iconSize * 0.9)
+                        .offset(y: iconSize * 0.3 - 2)
                 }
                 HStack(spacing: 0.1) {
-                    StatusIcon(phase: sessions[2].phase, size: iconSize)
-                    StatusIcon(phase: sessions[3].phase, size: iconSize)
+                    StatusIcon(phase: sessions[2].phase, size: iconSize * 0.9)
+                        .offset(y: -2)
+                    StatusIcon(phase: sessions[3].phase, size: iconSize * 0.9)
+                        .offset(y: -2)
                 }
             }
         }

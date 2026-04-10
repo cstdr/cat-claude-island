@@ -144,7 +144,6 @@ struct InstanceRow: View {
         HStack(alignment: .center, spacing: 10) {
             // State indicator on left
             stateIndicator
-                .frame(width: 14)
 
             // Text content
             VStack(alignment: .leading, spacing: 2) {
@@ -289,12 +288,8 @@ struct InstanceRow: View {
 
     @ViewBuilder
     private var stateIndicator: some View {
-        switch session.phase {
-        case .processing, .compacting:
-            LargeRunningCatIcon(size: 20)
-        default:
-            StatusIcon(phase: session.phase, size: 18)
-        }
+        StatusIcon(phase: session.phase, size: 18)
+            .frame(width: 18, height: 18)
     }
 
 }
