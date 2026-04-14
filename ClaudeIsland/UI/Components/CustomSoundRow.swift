@@ -121,7 +121,7 @@ struct CustomSoundRow: View {
                         }
                     } label: {
                         HStack {
-                            Text("Custom Sound")
+                            Text(LanguageManager.shared.localized("Custom Sound"))
                             Spacer()
                             if soundSource == .custom {
                                 Image(systemName: "checkmark")
@@ -232,7 +232,7 @@ struct CustomSoundRow: View {
                     HStack(spacing: 4) {
                         Image(systemName: isCurrentlyPlaying ? "stop.fill" : "play.fill")
                             .font(.system(size: 10))
-                        Text(isCurrentlyPlaying ? "Stop" : "Preview")
+                        Text(isCurrentlyPlaying ? LanguageManager.shared.localized("Stop") : LanguageManager.shared.localized("Preview"))
                             .font(.system(size: 11, weight: .medium))
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

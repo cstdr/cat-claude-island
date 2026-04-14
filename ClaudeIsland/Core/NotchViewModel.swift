@@ -54,6 +54,7 @@ class NotchViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let screenSelector = ScreenSelector.shared
+    private let claudeDirSelector = ClaudeDirSelector.shared
 
     // MARK: - Geometry
 
@@ -83,7 +84,9 @@ class NotchViewModel: ObservableObject {
             let contentHeight = menuContentHeight > 0 ? menuContentHeight : menuMinHeight
             return CGSize(
                 width: min(screenRect.width * 0.4, 480),
-                height: contentHeight + screenSelector.expandedPickerHeight
+                height: contentHeight
+                    + screenSelector.expandedPickerHeight
+                    + claudeDirSelector.expandedPickerHeight
             )
         case .instances:
             return CGSize(
@@ -130,6 +133,10 @@ class NotchViewModel: ObservableObject {
 
     private func observeSelectors() {
         screenSelector.$isPickerExpanded
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
+        claudeDirSelector.$isPickerExpanded
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
     }

@@ -2,6 +2,7 @@
 "Back" = "返回";
 "Screen" = "屏幕";
 "Notification Sound" = "通知声音";
+"Notification Sounds" = "通知声音";
 "Launch at Login" = "开机启动";
 "Hooks" = "Hooks";
 "Accessibility" = "无障碍";
@@ -11,6 +12,11 @@
 "Check for Updates" = "检查更新";
 "Star on GitHub" = "在 GitHub 上加星";
 "Quit" = "退出";
+"Automatic" = "自动";
+"Built-in or Main" = "内置或主屏";
+"Auto" = "自动";
+"Built-in" = "内置";
+"Main" = "主屏";
 
 /* Status */
 "Idle" = "空闲";
@@ -26,6 +32,7 @@
 "Archive" = "归档";
 "Chat" = "聊天";
 "Terminal" = "终端";
+"Go to Terminal" = "前往终端";
 
 /* Session */
 "No sessions" = "无会话";
@@ -49,3 +56,39 @@
 "1m" = "1分钟";
 "2m" = "2分钟";
 "5m" = "5分钟";
+
+/* Custom Sound */
+"Custom Sound" = "自定义声音";
+"Preview" = "预览";
+"Stop" = "停止";
+
+/* Accessibility */
+"On" = "已开启";
+"Enable" = "启用";
+"Reopen menu to apply" = "重新打开菜单以生效";
+
+/* Chat */
+"Loading messages..." = "加载消息中...";
+"No messages yet" = "暂无消息";
+"Interrupted" = "已中断";
+"Claude Code needs your input" = "Claude Code 需要你的输入";
+"Subagent used %d tools:" = "子代理使用了 %d 个工具：";
+"Waiting: %@" = "等待中：%@";
+
+/* Tool Results */
+"Created" = "已创建";
+"Wrote" = "已写入";
+"No matches found" = "未找到匹配";
+"No files found" = "未找到文件";
+"No results found" = "未找到结果";
+"Background task: %@" = "后台任务：%@";
+"Status: %@" = "状态：%@";
+"Exit: %@" = "退出：%@";
+"Shell %@ terminated" = "Shell %@ 已终止";
+"Completed" = "已完成";
+
+"Claude Directory" = "Claude 目录";
+"Auto-detect" = "自动检测";
+"Choose folder…" = "选择文件夹…";
+"Choose Claude Config Directory" = "选择 Claude 配置目录";
+"Select the folder Claude Code uses (typically ~/.claude or ~/.config/claude)." = "选择 Claude Code 使用的文件夹（通常为 ~/.claude 或 ~/.config/claude）。";

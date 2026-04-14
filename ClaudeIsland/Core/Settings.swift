@@ -81,6 +81,7 @@ enum AppSettings {
         static let waitingDisplayDuration = "waitingDisplayDuration"
         static let keepNotchVisible = "keepNotchVisible"
         static let language = "language"
+        static let claudeDirectoryName = "claudeDirectoryName"
     }
 
     // MARK: - Notification Sound
@@ -138,6 +139,20 @@ enum AppSettings {
         }
         set {
             defaults.set(newValue, forKey: Keys.language)
+        }
+    }
+
+    // MARK: - Claude Directory
+
+    /// Custom Claude config directory name (under ~) or absolute path.
+    /// Empty string means use the default (~/.claude or ~/.config/claude).
+    static var claudeDirectoryName: String {
+        get {
+            let value = defaults.string(forKey: Keys.claudeDirectoryName) ?? ""
+            return value.isEmpty ? ".claude" : value
+        }
+        set {
+            defaults.set(newValue.trimmingCharacters(in: .whitespaces), forKey: Keys.claudeDirectoryName)
         }
     }
 }

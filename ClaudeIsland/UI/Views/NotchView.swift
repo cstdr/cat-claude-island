@@ -325,6 +325,7 @@ struct NotchView: View {
                 ProcessingSpinner(isAnimating: shouldAnimate)
                     .id(shouldAnimate ? "spinner-animating" : "spinner-static")
                     .frame(width: viewModel.status == .opened ? 20 : sideWidth)
+                    .padding(.trailing, viewModel.status == .opened ? 0 : 4)
             }
         }
         .frame(height: closedNotchSize.height)

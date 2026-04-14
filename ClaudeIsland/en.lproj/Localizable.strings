@@ -2,6 +2,7 @@
 "Back" = "Back";
 "Screen" = "Screen";
 "Notification Sound" = "Notification Sound";
+"Notification Sounds" = "Notification Sounds";
 "Launch at Login" = "Launch at Login";
 "Hooks" = "Hooks";
 "Accessibility" = "Accessibility";
@@ -11,6 +12,11 @@
 "Check for Updates" = "Check for Updates";
 "Star on GitHub" = "Star on GitHub";
 "Quit" = "Quit";
+"Automatic" = "Automatic";
+"Built-in or Main" = "Built-in or Main";
+"Auto" = "Auto";
+"Built-in" = "Built-in";
+"Main" = "Main";
 
 /* Status */
 "Idle" = "Idle";
@@ -26,6 +32,7 @@
 "Archive" = "Archive";
 "Chat" = "Chat";
 "Terminal" = "Terminal";
+"Go to Terminal" = "Go to Terminal";
 
 /* Session */
 "No sessions" = "No sessions";
@@ -49,3 +56,39 @@
 "1m" = "1m";
 "2m" = "2m";
 "5m" = "5m";
+
+/* Custom Sound */
+"Custom Sound" = "Custom Sound";
+"Preview" = "Preview";
+"Stop" = "Stop";
+
+/* Accessibility */
+"On" = "On";
+"Enable" = "Enable";
+"Reopen menu to apply" = "Reopen menu to apply";
+
+/* Chat */
+"Loading messages..." = "Loading messages...";
+"No messages yet" = "No messages yet";
+"Interrupted" = "Interrupted";
+"Claude Code needs your input" = "Claude Code needs your input";
+"Subagent used %d tools:" = "Subagent used %d tools:";
+"Waiting: %@" = "Waiting: %@";
+
+/* Tool Results */
+"Created" = "Created";
+"Wrote" = "Wrote";
+"No matches found" = "No matches found";
+"No files found" = "No files found";
+"No results found" = "No results found";
+"Background task: %@" = "Background task: %@";
+"Status: %@" = "Status: %@";
+"Exit: %@" = "Exit: %@";
+"Shell %@ terminated" = "Shell %@ terminated";
+"Completed" = "Completed";
+
+"Claude Directory" = "Claude Directory";
+"Auto-detect" = "Auto-detect";
+"Choose folder…" = "Choose folder…";
+"Choose Claude Config Directory" = "Choose Claude Config Directory";
+"Select the folder Claude Code uses (typically ~/.claude or ~/.config/claude)." = "Select the folder Claude Code uses (typically ~/.claude or ~/.config/claude).";

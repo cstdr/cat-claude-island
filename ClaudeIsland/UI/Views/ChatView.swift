@@ -246,7 +246,7 @@ struct ChatView: View {
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: .white.opacity(0.4)))
                 .scaleEffect(0.8)
-            Text("Loading messages...")
+            Text("Loading messages...".localized)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.white.opacity(0.4))
         }
@@ -260,7 +260,7 @@ struct ChatView: View {
             Image(systemName: "bubble.left.and.bubble.right")
                 .font(.system(size: 24))
                 .foregroundColor(.white.opacity(0.2))
-            Text("No messages yet")
+            Text("No messages yet".localized)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.white.opacity(0.4))
         }
@@ -557,6 +557,8 @@ struct MessageItemView: View {
             ToolCallView(tool: tool, sessionId: sessionId)
         case .thinking(let text):
             ThinkingView(text: text)
+        case .image(let block):
+            ImageMessageView(image: block)
         case .interrupted:
             InterruptedMessageView()
         }
@@ -727,7 +729,7 @@ struct ToolCallView: View {
                         .truncationMode(.tail)
                 } else if tool.name == "AgentOutputTool", let desc = agentDescription {
                     let blocking = tool.input["block"] == "true"
-                    Text(blocking ? "Waiting: \(desc)" : desc)
+                    Text(blocking ? LanguageManager.shared.localized("Waiting: %@", desc) : desc)
                         .font(.system(size: 11))
                         .foregroundColor(textColor.opacity(0.7))
                         .lineLimit(1)
@@ -915,7 +917,7 @@ struct SubagentToolsSummary: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Subagent used \(tools.count) tools:")
+            Text(LanguageManager.shared.localized("Subagent used %d tools:", tools.count))
                 .font(.system(size: 10, weight: .medium))
                 .foregroundColor(.white.opacity(0.5))
 
@@ -938,6 +940,59 @@ struct SubagentToolsSummary: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(Color.white.opacity(0.03))
         )
+    }
+}
+
+// MARK: - Image Message View
+
+struct ImageMessageView: View {
+    let image: ImageBlock
+
+    /// Decoded image cached so base64 isn't re-decoded on every render.
+    /// Large inline images (tens of KB) would otherwise thrash during
+    /// scrolling or parent re-renders.
+    @State private var decoded: NSImage?
+
+    var body: some View {
+        HStack {
+            Spacer(minLength: 60)
+
+            if let decoded {
+                Image(nsImage: decoded)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 280, maxHeight: 280)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
+            } else {
+                // Decode failed — show a labelled placeholder rather than silently dropping
+                HStack(spacing: 6) {
+                    Image(systemName: "photo")
+                        .font(.system(size: 12))
+                    Text("Image (\(image.mediaType))")
+                        .font(.system(size: 12))
+                }
+                .foregroundColor(.white.opacity(0.5))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.white.opacity(0.08))
+                )
+            }
+        }
+        .task {
+            // Decode off the main thread so large images don't hitch scrolling.
+            let b64 = image.base64Data
+            let decoded = await Task.detached(priority: .userInitiated) {
+                guard let data = Data(base64Encoded: b64) else { return nil as NSImage? }
+                return NSImage(data: data)
+            }.value
+            self.decoded = decoded
+        }
     }
 }
 
@@ -994,7 +1049,7 @@ struct ThinkingView: View {
 struct InterruptedMessageView: View {
     var body: some View {
         HStack {
-            Text("Interrupted")
+            Text("Interrupted".localized)
                 .font(.system(size: 13))
                 .foregroundColor(.red)
             Spacer()
@@ -1019,7 +1074,7 @@ struct ChatInteractivePromptBar: View {
                 Text(MCPToolFormatter.formatToolName("AskUserQuestion"))
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundColor(TerminalColors.amber)
-                Text("Claude Code needs your input")
+                Text("Claude Code needs your input".localized)
                     .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.5))
                     .lineLimit(1)
@@ -1038,7 +1093,7 @@ struct ChatInteractivePromptBar: View {
                 HStack(spacing: 4) {
                     Image(systemName: "terminal")
                         .font(.system(size: 11, weight: .medium))
-                    Text("Terminal")
+                    Text("Terminal".localized)
                         .font(.system(size: 13, weight: .medium))
                 }
                 .foregroundColor(isInTmux ? .black : .white.opacity(0.4))
@@ -1102,7 +1157,7 @@ struct ChatApprovalBar: View {
             Button {
                 onDeny()
             } label: {
-                Text("Deny")
+                Text("Deny".localized)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.white.opacity(0.7))
                     .padding(.horizontal, 16)
@@ -1118,7 +1173,7 @@ struct ChatApprovalBar: View {
             Button {
                 onApprove()
             } label: {
-                Text("Allow")
+                Text("Allow".localized)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.black)
                     .padding(.horizontal, 16)

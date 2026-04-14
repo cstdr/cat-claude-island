@@ -11,6 +11,15 @@ import SwiftUI
 import ServiceManagement
 import Sparkle
 
+// MARK: - Preference Keys
+
+private struct MenuHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 // MARK: - NotchMenuView
 
 struct NotchMenuView: View {
@@ -18,123 +27,152 @@ struct NotchMenuView: View {
     @ObservedObject private var updateManager = UpdateManager.shared
     @ObservedObject private var screenSelector = ScreenSelector.shared
     @ObservedObject private var customSoundManager = CustomSoundManager.shared
+    @StateObject private var languageManager = LanguageManager.shared
     @State private var hooksInstalled: Bool = false
     @State private var launchAtLogin: Bool = false
     @State private var keepNotchVisible: Bool = false
 
+    // Force refresh when language changes
+    @State private var languageRefresh: Int = 0
+
     var body: some View {
-        VStack(spacing: 4) {
+        // Language change observer - triggers body re-evaluation
+        let _ = languageManager.refreshTrigger
+        let _ = languageRefresh // Reference to force observation
 
-            MenuRow(
-                icon: "chevron.left",
-                label: "Back"
-            ) {
-                viewModel.toggleMenu()
-            }
+        // ScrollView so the menu gracefully scrolls when content exceeds the
+        // panel height (e.g. both picker rows expanded on a small panel).
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 4) {
 
-            Divider()
-                .background(Color.white.opacity(0.08))
-                .padding(.vertical, 4)
+                MenuRow(
+                    icon: "chevron.left",
+                    label: "Back".localized
+                ) {
+                    viewModel.toggleMenu()
+                }
 
-            ScreenPickerRow(screenSelector: screenSelector)
+                Divider()
+                    .background(Color.white.opacity(0.08))
+                    .padding(.vertical, 4)
 
-            Divider()
-                .background(Color.white.opacity(0.08))
-                .padding(.vertical, 4)
+                ScreenPickerRow(screenSelector: screenSelector)
 
-            Text("Notification Sounds")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.white.opacity(0.4))
-                .textCase(.uppercase)
-                .tracking(0.5)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
+                Divider()
+                    .background(Color.white.opacity(0.08))
+                    .padding(.vertical, 4)
 
-            CustomSoundRow(type: .processing, soundManager: customSoundManager)
-            CustomSoundRow(type: .waiting, soundManager: customSoundManager)
-            CustomSoundRow(type: .permission, soundManager: customSoundManager)
+                Text("Notification Sounds".localized)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.4))
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
 
-            Divider()
-                .background(Color.white.opacity(0.08))
-                .padding(.vertical, 4)
+                CustomSoundRow(type: .processing, soundManager: customSoundManager)
+                CustomSoundRow(type: .waiting, soundManager: customSoundManager)
+                CustomSoundRow(type: .permission, soundManager: customSoundManager)
 
-            MenuToggleRow(
-                icon: "power",
-                label: "Launch at Login",
-                isOn: launchAtLogin
-            ) {
-                do {
-                    if launchAtLogin {
-                        try SMAppService.mainApp.unregister()
-                        launchAtLogin = false
-                    } else {
-                        try SMAppService.mainApp.register()
-                        launchAtLogin = true
+                Divider()
+                    .background(Color.white.opacity(0.08))
+                    .padding(.vertical, 4)
+
+                ClaudeDirPickerRow()
+
+                Divider()
+                    .background(Color.white.opacity(0.08))
+                    .padding(.vertical, 4)
+
+                MenuToggleRow(
+                    icon: "power",
+                    label: "Launch at Login".localized,
+                    isOn: launchAtLogin
+                ) {
+                    do {
+                        if launchAtLogin {
+                            try SMAppService.mainApp.unregister()
+                            launchAtLogin = false
+                        } else {
+                            try SMAppService.mainApp.register()
+                            launchAtLogin = true
+                        }
+                    } catch {
+                        print("Failed to toggle launch at login: \(error)")
                     }
-                } catch {
-                    print("Failed to toggle launch at login: \(error)")
+                }
+
+                MenuToggleRow(
+                    icon: "arrow.triangle.2.circlepath",
+                    label: "Hooks".localized,
+                    isOn: hooksInstalled
+                ) {
+                    if hooksInstalled {
+                        HookInstaller.uninstall()
+                        hooksInstalled = false
+                    } else {
+                        HookInstaller.installIfNeeded()
+                        hooksInstalled = true
+                    }
+                }
+
+                MenuToggleRow(
+                    icon: "eye",
+                    label: "Keep Visible".localized,
+                    isOn: keepNotchVisible
+                ) {
+                    keepNotchVisible.toggle()
+                    UserDefaults.standard.set(keepNotchVisible, forKey: "keepNotchVisible")
+                    NotificationCenter.default.post(name: .keepNotchVisibleDidChange, object: nil)
+                }
+
+                LanguageRow()
+
+                AccessibilityRow(isEnabled: AXIsProcessTrusted())
+
+                Divider()
+                    .background(Color.white.opacity(0.08))
+                    .padding(.vertical, 4)
+
+                UpdateRow(updateManager: updateManager)
+
+                MenuRow(
+                    icon: "star",
+                    label: "Star on GitHub".localized
+                ) {
+                    if let url = URL(string: "https://github.com/farouqaldori/claude-island") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+
+                Divider()
+                    .background(Color.white.opacity(0.08))
+                    .padding(.vertical, 4)
+
+                MenuRow(
+                    icon: "xmark.circle",
+                    label: "Quit".localized,
+                    isDestructive: true
+                ) {
+                    NSApplication.shared.terminate(nil)
                 }
             }
-
-            MenuToggleRow(
-                icon: "arrow.triangle.2.circlepath",
-                label: "Hooks",
-                isOn: hooksInstalled
-            ) {
-                if hooksInstalled {
-                    HookInstaller.uninstall()
-                    hooksInstalled = false
-                } else {
-                    HookInstaller.installIfNeeded()
-                    hooksInstalled = true
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .background(
+                GeometryReader { geometry in
+                    Color.clear.preference(
+                        key: MenuHeightKey.self,
+                        value: geometry.size.height
+                    )
                 }
-            }
-
-            MenuToggleRow(
-                icon: "eye",
-                label: String(localized: "Keep Visible"),
-                isOn: keepNotchVisible
-            ) {
-                keepNotchVisible.toggle()
-                UserDefaults.standard.set(keepNotchVisible, forKey: "keepNotchVisible")
-                NotificationCenter.default.post(name: .keepNotchVisibleDidChange, object: nil)
-            }
-
-            LanguageRow()
-
-            AccessibilityRow(isEnabled: AXIsProcessTrusted())
-
-            Divider()
-                .background(Color.white.opacity(0.08))
-                .padding(.vertical, 4)
-
-            UpdateRow(updateManager: updateManager)
-
-            MenuRow(
-                icon: "star",
-                label: "Star on GitHub"
-            ) {
-                if let url = URL(string: "https://github.com/farouqaldori/claude-island") {
-                    NSWorkspace.shared.open(url)
-                }
-            }
-
-            Divider()
-                .background(Color.white.opacity(0.08))
-                .padding(.vertical, 4)
-
-            MenuRow(
-                icon: "xmark.circle",
-                label: "Quit",
-                isDestructive: true
-            ) {
-                NSApplication.shared.terminate(nil)
-            }
+            )
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .top)
+        .onPreferenceChange(MenuHeightKey.self) { height in
+            viewModel.menuContentHeight = height
+        }
         .onAppear {
             refreshStates()
         }
@@ -221,7 +259,7 @@ struct UpdateRow: View {
                 Image(systemName: "checkmark")
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(TerminalColors.green)
-                Text("Up to date")
+                Text("Up to date".localized)
                     .font(.system(size: 11))
                     .foregroundColor(TerminalColors.green)
             }
@@ -274,7 +312,7 @@ struct UpdateRow: View {
             }
 
         case .error:
-            Text("Retry")
+            Text("Retry".localized)
                 .font(.system(size: 11))
                 .foregroundColor(.white.opacity(0.5))
         }
@@ -309,15 +347,15 @@ struct UpdateRow: View {
 
     private var label: String {
         switch updateManager.state {
-        case .idle: return "Check for Updates"
-        case .checking: return "Checking..."
-        case .upToDate: return "Check for Updates"
-        case .found: return "Download Update"
-        case .downloading: return "Downloading..."
-        case .extracting: return "Extracting..."
-        case .readyToInstall: return "Install & Relaunch"
-        case .installing: return "Installing..."
-        case .error: return "Update failed"
+        case .idle: return "Check for Updates".localized
+        case .checking: return "Checking...".localized
+        case .upToDate: return "Check for Updates".localized
+        case .found: return "Download Update".localized
+        case .downloading: return "Downloading...".localized
+        case .extracting: return "Extracting...".localized
+        case .readyToInstall: return "Install & Relaunch".localized
+        case .installing: return "Installing...".localized
+        case .error: return "Update failed".localized
         }
     }
 
@@ -367,7 +405,7 @@ struct AccessibilityRow: View {
                 .foregroundColor(textColor)
                 .frame(width: 16)
 
-            Text("Accessibility")
+            Text("Accessibility".localized)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(textColor)
 
@@ -378,12 +416,12 @@ struct AccessibilityRow: View {
                     .fill(TerminalColors.green)
                     .frame(width: 6, height: 6)
 
-                Text("On")
+                Text("On".localized)
                     .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.4))
             } else {
                 Button(action: openAccessibilitySettings) {
-                    Text("Enable")
+                    Text("Enable".localized)
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.black)
                         .padding(.horizontal, 10)
@@ -486,7 +524,7 @@ struct MenuToggleRow: View {
                     .fill(isOn ? TerminalColors.green : Color.white.opacity(0.3))
                     .frame(width: 6, height: 6)
 
-                Text(isOn ? "On" : "Off")
+                Text(isOn ? "On".localized : "Off".localized)
                     .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.4))
             }
@@ -509,10 +547,9 @@ struct MenuToggleRow: View {
 // MARK: - Language Row
 
 struct LanguageRow: View {
-    @AppStorage("language") private var language: String?
+    @StateObject private var languageManager = LanguageManager.shared
     @State private var isHovered = false
     @State private var isExpanded = false
-    @State private var selectedCode: String? = nil
 
     private let languages = [
         ("System", nil as String?),
@@ -521,7 +558,7 @@ struct LanguageRow: View {
     ]
 
     private var currentLabel: String {
-        let lang = selectedCode ?? language
+        let lang = languageManager.currentLanguage
         return languages.first { $0.1 == lang }?.0 ?? "System"
     }
 
@@ -536,7 +573,7 @@ struct LanguageRow: View {
                         .foregroundColor(textColor)
                         .frame(width: 16)
 
-                    Text(String(localized: "Language"))
+                    Text("Language".localized)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(textColor)
 
@@ -564,24 +601,17 @@ struct LanguageRow: View {
                 VStack(spacing: 0) {
                     ForEach(languages, id: \.0) { name, code in
                         Button {
-                            selectedCode = code
-                            if let c = code {
-                                UserDefaults.standard.set(c, forKey: "language")
-                                UserDefaults.standard.set([c], forKey: "AppleLanguages")
-                            } else {
-                                UserDefaults.standard.removeObject(forKey: "language")
-                                UserDefaults.standard.removeObject(forKey: "AppleLanguages")
-                            }
+                            languageManager.currentLanguage = code
                             isExpanded = false
                         } label: {
                             HStack(spacing: 10) {
                                 Text(name)
                                     .font(.system(size: 12))
-                                    .foregroundColor((selectedCode ?? language) == code ? TerminalColors.green : Color.white.opacity(0.7))
+                                    .foregroundColor(languageManager.currentLanguage == code ? TerminalColors.green : Color.white.opacity(0.7))
 
                                 Spacer()
 
-                                if (selectedCode ?? language) == code {
+                                if languageManager.currentLanguage == code {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 10, weight: .bold))
                                         .foregroundColor(TerminalColors.green)
@@ -594,7 +624,7 @@ struct LanguageRow: View {
                     }
                 }
 
-                Text("Reopen menu to apply")
+                Text("Reopen menu to apply".localized)
                     .font(.system(size: 10))
                     .foregroundColor(.white.opacity(0.5))
                     .padding(.top, 6)
