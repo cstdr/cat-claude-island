@@ -50,9 +50,12 @@ jobs:
           ls -la appcast.xml
 
       - name: Upload Pages artifact
+        run: |
+          mkdir -p _site
+          cp appcast.xml _site/
         uses: actions/upload-pages-artifact@v3
         with:
-          path: appcast.xml
+          path: _site
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
