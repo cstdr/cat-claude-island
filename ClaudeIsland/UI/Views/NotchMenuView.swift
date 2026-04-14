@@ -146,6 +146,15 @@ struct NotchMenuView: View {
                     }
                 }
 
+                MenuRow(
+                    icon: "star.circle",
+                    label: "Star the Original Developer".localized
+                ) {
+                    if let url = URL(string: "https://github.com/farouqaldori/claude-island") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+
                 Divider()
                     .background(Color.white.opacity(0.08))
                     .padding(.vertical, 4)
