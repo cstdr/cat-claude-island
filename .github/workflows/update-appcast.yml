@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
   update-appcast:
@@ -16,12 +18,58 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate appcast
-        uses: tstevens/github-sparkle@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          github_repository: ${{ github.repository }}
-          asset_extension: zip
-          asset_name: Claude Island
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          # Get latest release info
+          TAG_NAME=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest" \
+            | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+          VERSION=$(echo $TAG_NAME | sed 's/v//')
+          RELEASE_NOTES=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest" \
+            | grep '"body":' | sed -E 's/.*"([^"]+)".*/\1/' | sed 's/\\r\\n/\n/g')
+
+          # Find the zip asset
+          ASSET_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest" \
+            | grep -o '"browser_download_url": "[^"]*\.zip"' \
+            | head -1 | sed 's/"browser_download_url": "//;s/"//')
+
+          # Get asset size
+          ASSET_SIZE=$(curl -s -I -H "Authorization: token $GITHUB_TOKEN" "$ASSET_URL" \
+            | grep -i content-length | awk '{print $2}' | tr -d '\r')
+
+          echo "Tag: $TAG_NAME"
+          echo "Version: $VERSION"
+          echo "Asset URL: $ASSET_URL"
+          echo "Asset Size: $ASSET_SIZE"
+
+          # Generate appcast.xml
+          cat > appcast.xml << APPCAST
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Cat-Claude-Island Updates</title>
+    <link>https://cstdr.github.io/cat-claude-island/appcast.xml</link>
+    <description>Most recent updates</description>
+    <language>en</language>
+    <item>
+      <title>$TAG_NAME</title>
+      <sparkle:version>$VERSION</sparkle:version>
+      <sparkle:shortVersionString>$TAG_NAME</sparkle:shortVersionString>
+      <sparkle:releaseNotesLink>https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG_NAME</sparkle:releaseNotesLink>
+      <enclosure url="$ASSET_URL"
+                 length="$ASSET_SIZE"
+                 type="application/octet-stream"/>
+    </item>
+  </channel>
+</rss>
+APPCAST
+
+          cat appcast.xml
 
       - name: Upload appcast
         uses: actions/upload-pages-artifact@v3
