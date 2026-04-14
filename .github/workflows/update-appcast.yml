@@ -20,6 +20,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
+          set -e
+
           # Get latest release info
           RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest")
@@ -38,34 +40,26 @@ jobs:
           echo "Tag: $TAG_NAME, Version: $VERSION"
           echo "Asset: $ASSET_URL ($ASSET_SIZE bytes)"
 
-          # Generate appcast.xml
-          cat > appcast.xml << 'APPCAST'
-<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
-  <channel>
-    <title>Cat-Claude-Island Updates</title>
-    <link>https://cstdr.github.io/cat-claude-island/appcast.xml</link>
-    <description>Most recent updates</description>
-    <language>en</language>
-    <item>
-      <title>TAG_PLACEHOLDER</title>
-      <sparkle:version>VERSION_PLACEHOLDER</sparkle:version>
-      <sparkle:shortVersionString>TAG_PLACEHOLDER</sparkle:shortVersionString>
-      <sparkle:releaseNotesLink>https://REPO_PLACEHOLDER/releases/tag/TAG_PLACEHOLDER</sparkle:releaseNotesLink>
-      <enclosure url="ASSET_PLACEHOLDER"
-                 length="SIZE_PLACEHOLDER"
-                 type="application/octet-stream"/>
-    </item>
-  </channel>
-</rss>
-APPCAST
-
-          # Replace placeholders using sed
-          sed -i "s/TAG_PLACEHOLDER/$TAG_NAME/g" appcast.xml
-          sed -i "s/VERSION_PLACEHOLDER/$VERSION/g" appcast.xml
-          sed -i "s|ASSET_PLACEHOLDER|$ASSET_URL|g" appcast.xml
-          sed -i "s/SIZE_PLACEHOLDER/$ASSET_SIZE/g" appcast.xml
-          sed -i "s|REPO_PLACEHOLDER|$GITHUB_REPOSITORY|g" appcast.xml
+          # Write appcast.xml using printf
+          printf '<?xml version="1.0" encoding="UTF-8"?>\n' > appcast.xml
+          printf '<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">\n' >> appcast.xml
+          printf '  <channel>\n' >> appcast.xml
+          printf '    <title>Cat-Claude-Island Updates</title>\n' >> appcast.xml
+          printf '    <link>https://cstdr.github.io/cat-claude-island/appcast.xml</link>\n' >> appcast.xml
+          printf '    <description>Most recent updates</description>\n' >> appcast.xml
+          printf '    <language>en</language>\n' >> appcast.xml
+          printf '    <item>\n' >> appcast.xml
+          printf '      <title>%s</title>\n' "$TAG_NAME" >> appcast.xml
+          printf '      <sparkle:version>%s</sparkle:version>\n' "$VERSION" >> appcast.xml
+          printf '      <sparkle:shortVersionString>%s</sparkle:shortVersionString>\n' "$TAG_NAME" >> appcast.xml
+          printf '      <sparkle:releaseNotesLink>https://%s/releases/tag/%s</sparkle:releaseNotesLink>\n' \
+            "$GITHUB_REPOSITORY" "$TAG_NAME" >> appcast.xml
+          printf '      <enclosure url="%s"\n' "$ASSET_URL" >> appcast.xml
+          printf '               length="%s"\n' "$ASSET_SIZE" >> appcast.xml
+          printf '               type="application/octet-stream"/>\n' >> appcast.xml
+          printf '    </item>\n' >> appcast.xml
+          printf '  </channel>\n' >> appcast.xml
+          printf '</rss>\n' >> appcast.xml
 
           cat appcast.xml
 
