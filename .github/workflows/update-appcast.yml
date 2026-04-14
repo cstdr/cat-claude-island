@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
   generate-appcast:
@@ -40,31 +42,41 @@ jobs:
           echo "Tag: $TAG_NAME, Version: $VERSION"
           echo "Asset: $ASSET_URL ($ASSET_SIZE bytes)"
 
-          # Write appcast.xml using printf
-          printf '<?xml version="1.0" encoding="UTF-8"?>\n' > appcast.xml
-          printf '<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">\n' >> appcast.xml
-          printf '  <channel>\n' >> appcast.xml
-          printf '    <title>Cat-Claude-Island Updates</title>\n' >> appcast.xml
-          printf '    <link>https://cstdr.github.io/cat-claude-island/appcast.xml</link>\n' >> appcast.xml
-          printf '    <description>Most recent updates</description>\n' >> appcast.xml
-          printf '    <language>en</language>\n' >> appcast.xml
-          printf '    <item>\n' >> appcast.xml
-          printf '      <title>%s</title>\n' "$TAG_NAME" >> appcast.xml
-          printf '      <sparkle:version>%s</sparkle:version>\n' "$VERSION" >> appcast.xml
-          printf '      <sparkle:shortVersionString>%s</sparkle:shortVersionString>\n' "$TAG_NAME" >> appcast.xml
-          printf '      <sparkle:releaseNotesLink>https://%s/releases/tag/%s</sparkle:releaseNotesLink>\n' \
-            "$GITHUB_REPOSITORY" "$TAG_NAME" >> appcast.xml
-          printf '      <enclosure url="%s"\n' "$ASSET_URL" >> appcast.xml
-          printf '               length="%s"\n' "$ASSET_SIZE" >> appcast.xml
-          printf '               type="application/octet-stream"/>\n' >> appcast.xml
-          printf '    </item>\n' >> appcast.xml
-          printf '  </channel>\n' >> appcast.xml
-          printf '</rss>\n' >> appcast.xml
+          # Write appcast.xml
+          cat > appcast.xml << 'XMLEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Cat-Claude-Island Updates</title>
+    <link>https://cstdr.github.io/cat-claude-island/appcast.xml</link>
+    <description>Most recent updates</description>
+    <language>en</language>
+    <item>
+      <title>TAG</title>
+      <sparkle:version>VER</sparkle:version>
+      <sparkle:shortVersionString>TAG</sparkle:shortVersionString>
+      <sparkle:releaseNotesLink>https://REPO/releases/tag/TAG</sparkle:releaseNotesLink>
+      <enclosure url="URL"
+                 length="SIZE"
+                 type="application/octet-stream"/>
+    </item>
+  </channel>
+</rss>
+XMLEOF
+
+          # Replace placeholders
+          sed -i "s/TAG/$TAG_NAME/g" appcast.xml
+          sed -i "s/VER/$VERSION/g" appcast.xml
+          sed -i "s|URL|$ASSET_URL|g" appcast.xml
+          sed -i "s/SIZE/$ASSET_SIZE/g" appcast.xml
+          sed -i "s|REPO|$GITHUB_REPOSITORY|g" appcast.xml
 
           cat appcast.xml
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: appcast
           path: appcast.xml
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
