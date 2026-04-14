@@ -14,34 +14,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-
-      - name: Install sparkle-tools
-        run: gem install sparkle-utils
-
       - name: Generate appcast
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Generate appcast from releases
-          generate_appcast \
-            --github-repo ${{ github.repository }} \
-            --output-path appcast.xml \
-            --signing-key "${{ secrets.SPARKLE_SIGNING_KEY }}"
+        uses: tstevens/github-sparkle@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          github_repository: ${{ github.repository }}
+          asset_extension: zip
+          asset_name: Claude Island
 
-      - name: Upload appcast to Pages
-        if: success()
+      - name: Upload appcast
         uses: actions/upload-pages-artifact@v3
         with:
           path: appcast.xml
 
       - name: Deploy to GitHub Pages
         if: success()
-        id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: appcast
-          token: ${{ secrets.GITHUB_TOKEN }}
