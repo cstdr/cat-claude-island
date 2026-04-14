@@ -23,6 +23,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           set -e
+          cd $GITHUB_WORKSPACE
           RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest")
           TAG_NAME=$(echo "$RESPONSE" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
@@ -34,19 +35,19 @@ jobs:
           echo "Tag: $TAG_NAME"
           echo "Asset URL: $ASSET_URL"
           echo "Asset Size: $ASSET_SIZE"
-          XML="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-          XML="$XML<rss version=\"2.0\" xmlns:sparkle=\"http://www.andymatuschak.org/xml-namespaces/sparkle\">"
-          XML="$XML<channel><title>Cat-Claude-Island Updates</title>"
-          XML="$XML<link>https://cstdr.github.io/cat-claude-island/appcast.xml</link>"
-          XML="$XML<description>Most recent updates</description><language>en</language>"
-          XML="$XML<item><title>$TAG_NAME</title>"
-          XML="$XML<sparkle:version>$VERSION</sparkle:version>"
-          XML="$XML<sparkle:shortVersionString>$TAG_NAME</sparkle:shortVersionString>"
-          XML="$XML<sparkle:releaseNotesLink>https://$GITHUB_REPOSITORY/releases/tag/$TAG_NAME</sparkle:releaseNotesLink>"
-          XML="$XML<enclosure url=\"$ASSET_URL\" length=\"$ASSET_SIZE\" type=\"application/octet-stream\"/>"
-          XML="$XML</item></channel></rss>"
-          echo "$XML" > appcast.xml
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > appcast.xml
+          echo '<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">' >> appcast.xml
+          echo '<channel><title>Cat-Claude-Island Updates</title>' >> appcast.xml
+          echo '<link>https://cstdr.github.io/cat-claude-island/appcast.xml</link>' >> appcast.xml
+          echo '<description>Most recent updates</description><language>en</language>' >> appcast.xml
+          echo "<item><title>$TAG_NAME</title>" >> appcast.xml
+          echo "<sparkle:version>$VERSION</sparkle:version>" >> appcast.xml
+          echo "<sparkle:shortVersionString>$TAG_NAME</sparkle:shortVersionString>" >> appcast.xml
+          echo "<sparkle:releaseNotesLink>https://$GITHUB_REPOSITORY/releases/tag/$TAG_NAME</sparkle:releaseNotesLink>" >> appcast.xml
+          echo "<enclosure url=\"$ASSET_URL\" length=\"$ASSET_SIZE\" type=\"application/octet-stream\"/>" >> appcast.xml
+          echo '</item></channel></rss>' >> appcast.xml
           cat appcast.xml
+          ls -la appcast.xml
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
