@@ -1,6 +1,8 @@
+# Pet Claude Island
+
 <div align="center">
   <img src="ClaudeIsland/Assets.xcassets/AppIcon.appiconset/icon_128x128.png" alt="Logo" width="100" height="100">
-  <h3 align="center">Claude Island</h3>
+  <h3 align="center">Pet Claude Island</h3>
   <p align="center">
     A macOS menu bar app featuring adorable animated cats in the Dynamic Island.
     <br />
@@ -9,11 +11,11 @@
     <a href="README_zh.md">中文版</a>
     <br />
     <br />
-    <a href="https://github.com/cstdr/cat-claude-island/releases/latest" target="_blank" rel="noopener noreferrer">
-      <img src="https://img.shields.io/github/v/release/cstdr/cat-claude-island?style=rounded&color=white&labelColor=000000&label=release" alt="Release Version" />
+    <a href="https://github.com/cstdr/pet-claude-island/releases/latest" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/github/v/release/cstdr/pet-claude-island?style=rounded&color=white&labelColor=000000&label=release" alt="Release Version" />
     </a>
-    <a href="#" target="_blank" rel="noopener noreferrer">
-      <img alt="GitHub Downloads" src="https://img.shields.io/github/downloads/cstdr/cat-claude-island/total?style=rounded&color=white&labelColor=000000">
+    <a href="https://github.com/cstdr/pet-claude-island" target="_blank" rel="noopener noreferrer">
+      <img alt="GitHub" src="https://img.shields.io/github/downloads/cstdr/pet-claude-island/total?style=rounded&color=white&labelColor=000000">
     </a>
   </p>
 </div>
@@ -41,18 +43,18 @@
 Download the latest release or build from source:
 
 ```bash
-xcodebuild -scheme ClaudeIsland -configuration Release build
+xcodebuild -scheme PetClaudeIsland -configuration Release build
 ```
 
 ## How It Works
 
-Claude Island installs hooks into `~/.claude/hooks/` that communicate session state via a Unix socket. The app listens for events and displays them in the notch overlay.
+Pet Claude Island installs hooks into `~/.claude/hooks/` that communicate session state via a Unix socket. The app listens for events and displays them in the notch overlay.
 
 When Claude needs permission to run a tool, the notch expands with approve/deny buttons—no need to switch to the terminal.
 
 ## Analytics
 
-Claude Island uses Mixpanel to collect anonymous usage data:
+Pet Claude Island uses Mixpanel to collect anonymous usage data:
 
 - **App Launched** — App version, build number, macOS version
 - **Session Started** — When a new Claude Code session is detected
@@ -62,3 +64,5 @@ No personal data or conversation content is collected.
 ## License
 
 Apache 2.0
+
+Based on [Claude Island](https://github.com/farouqaldori/claude-island) by Farouq Aldori.

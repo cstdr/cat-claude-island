@@ -4,6 +4,8 @@ import Mixpanel
 import Sparkle
 import SwiftUI
 
+// Based on Claude Island by Farouq Aldori
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var windowManager: WindowManager?
     private var screenObserver: ScreenObserver?
@@ -42,7 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        Mixpanel.initialize(token: "49814c1436104ed108f3fc4735228496")
+        Mixpanel.initialize(token: "fbf0ea769e7d93e51bb9baab85dde74f")
         AppDelegate.isMixpanelInitialized = true
 
         let distinctId = getOrCreateDistinctId()

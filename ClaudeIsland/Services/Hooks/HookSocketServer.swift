@@ -5,6 +5,8 @@
 //  Unix domain socket server for real-time hook events
 //  Supports request/response for permission decisions
 //
+//  Based on Claude Island by Farouq Aldori
+//
 
 import Foundation
 import os.log

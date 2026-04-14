@@ -37,8 +37,8 @@ jobs:
           echo "Asset Size: $ASSET_SIZE"
           echo '<?xml version="1.0" encoding="UTF-8"?>' > appcast.xml
           echo '<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">' >> appcast.xml
-          echo '<channel><title>Cat-Claude-Island Updates</title>' >> appcast.xml
-          echo '<link>https://cstdr.github.io/cat-claude-island/appcast.xml</link>' >> appcast.xml
+          echo '<channel><title>Pet Claude Island Updates</title>' >> appcast.xml
+          echo '<link>https://cstdr.github.io/pet-claude-island/appcast.xml</link>' >> appcast.xml
           echo '<description>Most recent updates</description><language>en</language>' >> appcast.xml
           echo "<item><title>$TAG_NAME</title>" >> appcast.xml
           echo "<sparkle:version>$VERSION</sparkle:version>" >> appcast.xml

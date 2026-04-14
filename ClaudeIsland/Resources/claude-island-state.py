@@ -3,6 +3,8 @@
 Claude Island Hook
 - Sends session state to ClaudeIsland.app via Unix socket
 - For PermissionRequest: waits for user decision from the app
+
+Based on Claude Island by Farouq Aldori
 """
 import json
 import os

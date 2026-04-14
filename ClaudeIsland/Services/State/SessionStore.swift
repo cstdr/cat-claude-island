@@ -5,6 +5,8 @@
 //  Central state manager for all Claude sessions.
 //  Single source of truth - all state mutations flow through process().
 //
+//  Based on Claude Island by Farouq Aldori
+//
 
 import Combine
 import Foundation

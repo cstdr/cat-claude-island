@@ -4,6 +4,8 @@
 //
 //  State management for the dynamic island
 //
+//  Based on Claude Island by Farouq Aldori
+//
 
 import AppKit
 import Combine

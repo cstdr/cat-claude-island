@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Claude Island</string>
+    <string>Pet Claude Island</string>
     <key>CFBundleDisplayName</key>
-    <string>Claude Island</string>
+    <string>Pet Claude Island</string>
     <key>CFBundleIdentifier</key>
     <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>CFBundleVersion</key>
@@ -17,11 +17,11 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>Claude Island needs microphone access to record custom notification sounds.</string>
     <key>NSHumanReadableCopyright</key>
-    <string>Copyright 2025. All rights reserved.</string>
+    <string>Copyright 2026 royding. All rights reserved.</string>
 
     <!-- Sparkle Update Configuration -->
     <key>SUFeedURL</key>
-    <string>https://cstdr.github.io/cat-claude-island/appcast.xml</string>
+    <string>https://cstdr.github.io/pet-claude-island/appcast.xml</string>
     <!-- SUPublicEDKey: Set your EdDSA public key here if using code signing -->
     <key>SUEnableAutomaticChecks</key>
     <true/>

@@ -1,16 +1,16 @@
-# Claude Island
+# 宠物克劳德灵动岛
 
 <div align="center">
   <img src="ClaudeIsland/Assets.xcassets/AppIcon.appiconset/icon_128x128.png" alt="Logo" width="100" height="100">
-  <h3 align="center">Claude Island</h3>
+  <h3 align="center">宠物克劳德灵动岛</h3>
   <p align="center">
     一款 macOS 菜单栏应用，在灵动岛上展示可爱的动画猫咪
     <br />
     使用像素风格猫咪（Gulu 和 Yiyi）追踪 Claude Code 会话 🐱
     <br />
     <br />
-    <a href="https://github.com/cstdr/cat-claude-island/releases/latest" target="_blank" rel="noopener noreferrer">
-      <img src="https://img.shields.io/github/v/release/cstdr/cat-claude-island?style=rounded&color=white&labelColor=000000&label=release" alt="Release Version" />
+    <a href="https://github.com/cstdr/pet-claude-island/releases/latest" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/github/v/release/cstdr/pet-claude-island?style=rounded&color=white&labelColor=000000&label=release" alt="Release Version" />
     </a>
   </p>
 </div>
@@ -38,18 +38,18 @@
 下载最新版本或从源码构建：
 
 ```bash
-xcodebuild -scheme ClaudeIsland -configuration Release build
+xcodebuild -scheme PetClaudeIsland -configuration Release build
 ```
 
 ## 工作原理
 
-Claude Island 在 `~/.claude/hooks/` 中安装钩子，通过 Unix 套接字通信会话状态。应用监听事件并在灵动岛悬浮层中显示。
+宠物克劳德灵动岛在 `~/.claude/hooks/` 中安装钩子，通过 Unix 套接字通信会话状态。应用监听事件并在灵动岛悬浮层中显示。
 
 当 Claude 需要运行工具的权限时，灵动岛会展开并显示批准/拒绝按钮——无需切换到终端。
 
 ## 分析统计
 
-Claude Island 使用 Mixpanel 收集匿名使用数据：
+宠物克劳德灵动岛使用 Mixpanel 收集匿名使用数据：
 
 - **应用启动** — 应用版本、构建号、macOS 版本
 - **会话开始** — 检测到新 Claude Code 会话时
@@ -59,3 +59,5 @@ Claude Island 使用 Mixpanel 收集匿名使用数据：
 ## 许可证
 
 Apache 2.0
+
+基于 [Claude Island](https://github.com/farouqaldori/claude-island) by Farouq Aldori 开发。

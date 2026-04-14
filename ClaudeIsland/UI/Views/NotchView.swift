@@ -4,6 +4,8 @@
 //
 //  The main dynamic island SwiftUI view with accurate notch shape
 //
+//  Based on Claude Island by Farouq Aldori
+//
 
 import AppKit
 import CoreGraphics

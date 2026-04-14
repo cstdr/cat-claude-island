@@ -4,6 +4,8 @@
 //
 //  Redesigned chat interface with clean visual hierarchy
 //
+//  Based on Claude Island by Farouq Aldori
+//
 
 import Combine
 import SwiftUI
