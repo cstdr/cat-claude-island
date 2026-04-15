@@ -44,33 +44,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        // Mixpanel disabled due to initialization timing issue
-        // Mixpanel.initialize(token: "fbf0ea769e7d93e51bb9baab85dde74f", trackAutomaticEvents: false)
+        // Initialize Mixpanel first before any other calls
+        Mixpanel.initialize(token: "fbf0ea769e7d93e51bb9baab85dde74f", trackAutomaticEvents: false)
         AppDelegate.isMixpanelInitialized = true
 
-        // let distinctId = getOrCreateDistinctId()
-        // Mixpanel.mainInstance().identify(distinctId: distinctId)
+        let distinctId = getOrCreateDistinctId()
+        Mixpanel.mainInstance().identify(distinctId: distinctId)
 
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
         let osVersion = Foundation.ProcessInfo.processInfo.operatingSystemVersionString
 
-        // Mixpanel.mainInstance().registerSuperProperties([
-        //     "app_version": version,
-        //     "build_number": build,
-        //     "macos_version": osVersion
-        // ])
+        Mixpanel.mainInstance().registerSuperProperties([
+            "app_version": version,
+            "build_number": build,
+            "macos_version": osVersion
+        ])
 
+        // fetchAndRegisterClaudeVersion must be called AFTER Mixpanel is initialized
         fetchAndRegisterClaudeVersion()
 
-        // Mixpanel.mainInstance().people.set(properties: [
-        //     "app_version": version,
-        //     "build_number": build,
-        //     "macos_version": osVersion
-        // ])
+        Mixpanel.mainInstance().people.set(properties: [
+            "app_version": version,
+            "build_number": build,
+            "macos_version": osVersion
+        ])
 
-        // Mixpanel.mainInstance().track(event: "App Launched")
-        // Mixpanel.mainInstance().flush()
+        Mixpanel.mainInstance().track(event: "App Launched")
+        Mixpanel.mainInstance().flush()
 
         HookInstaller.installIfNeeded()
         NSApplication.shared.setActivationPolicy(.accessory)
@@ -97,7 +98,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        // Mixpanel.mainInstance().flush()
+        if AppDelegate.isMixpanelInitialized {
+            Mixpanel.mainInstance().flush()
+        }
         updateCheckTimer?.invalidate()
         screenObserver = nil
     }
@@ -172,8 +175,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                   let json = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
                   let version = json["version"] as? String else { continue }
 
-            // Mixpanel.mainInstance().registerSuperProperties(["claude_code_version": version])
-            // Mixpanel.mainInstance().people.set(properties: ["claude_code_version": version])
+            if AppDelegate.isMixpanelInitialized {
+                Mixpanel.mainInstance().registerSuperProperties(["claude_code_version": version])
+                Mixpanel.mainInstance().people.set(properties: ["claude_code_version": version])
+            }
             return
         }
     }
