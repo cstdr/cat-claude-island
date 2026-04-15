@@ -53,7 +53,7 @@ struct TerminalAppRegistry: Sendable {
     ]
 
     /// Check if an app name or command path is a known terminal
-    nonisolated static func isTerminal(_ appNameOrCommand: String) -> Bool {
+    static func isTerminal(_ appNameOrCommand: String) -> Bool {
         let lower = appNameOrCommand.lowercased()
 
         // Check if any known app name is contained in the command (case-insensitive)
@@ -68,7 +68,7 @@ struct TerminalAppRegistry: Sendable {
     }
 
     /// Check if a bundle identifier is a known terminal
-    nonisolated static func isTerminalBundle(_ bundleId: String) -> Bool {
+    static func isTerminalBundle(_ bundleId: String) -> Bool {
         bundleIdentifiers.contains(bundleId)
     }
 }
